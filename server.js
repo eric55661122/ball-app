@@ -10,7 +10,9 @@ const JWT_SECRET = process.env.JWT_SECRET || 'change-this-secret';
 
 const pool = new Pool({
   connectionString: process.env.POSTGRES_URI,
-  ssl: { rejectUnauthorized: false },
+  ssl: process.env.POSTGRES_URI && process.env.POSTGRES_URI.includes('sslmode=require')
+    ? { rejectUnauthorized: false }
+    : false,
 });
 
 async function initDB() {
