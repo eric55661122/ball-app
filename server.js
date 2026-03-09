@@ -79,6 +79,11 @@ app.post('/api/login', async (req, res) => {
 
 app.post('/api/logout', (req, res) => res.json({ ok: true }));
 
+app.get('/api/check-init', async (req, res) => {
+  const { rows } = await pool.query('SELECT COUNT(*) c FROM users');
+  res.json({ initialized: parseInt(rows[0].c) > 0 });
+});
+
 app.get('/api/me', auth, (req, res) => res.json({ username: req.user.username }));
 
 app.post('/api/change-password', auth, async (req, res) => {

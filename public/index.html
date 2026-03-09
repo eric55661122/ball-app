@@ -2138,13 +2138,15 @@ document.getElementById('today-date').textContent = new Date().toLocaleDateStrin
       document.getElementById('pw-overlay').style.display = 'none';
       renderDashboard();
     } else {
-      // Check if first-time (no users)
-      const regTest = await fetch('/api/register', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({})});
-      const regData = await regTest.json();
-      if(regData.error !== '系統已初始化，請聯繫管理員') {
-        document.getElementById('register-section').style.display = 'block';
-        document.getElementById('login-subtitle').textContent = '首次使用，請建立管理員帳號';
-      }
+      // Check if first-time (no users) - use a dedicated check endpoint
+      try {
+        const regTest = await fetch('/api/check-init');
+        const regData = await regTest.json();
+        if(!regData.initialized) {
+          document.getElementById('register-section').style.display = 'block';
+          document.getElementById('login-subtitle').textContent = '首次使用，請建立管理員帳號';
+        }
+      } catch(e) {}
       showLogin();
     }
   } catch(e) { showLogin(); }
