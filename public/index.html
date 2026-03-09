@@ -287,23 +287,22 @@
 </head>
 <body>
 
-<!-- Login Page -->
+<!-- Password Overlay -->
 <div class="pw-overlay" id="pw-overlay">
   <div class="pw-box">
     <div style="font-size:40px;margin-bottom:8px;">⚽</div>
     <h2>球帳管理系統</h2>
-    <p id="login-subtitle">請登入以繼續</p>
-    <input class="pw-input" id="login-username" type="text" placeholder="帳號" maxlength="30"
-      style="letter-spacing:normal;margin-bottom:10px;"
-      onkeydown="if(event.key==='Enter') document.getElementById('login-password').focus()">
-    <input class="pw-input" id="login-password" type="password" placeholder="密碼" maxlength="30"
-      onkeydown="if(event.key==='Enter') doLogin()">
+    <p>請輸入密碼進入系統</p>
+    <input class="pw-input" type="password" id="pw-input" placeholder="••••••" maxlength="20"
+      onkeydown="if(event.key==='Enter') checkPassword()">
     <div class="pw-error" id="pw-error"></div>
-    <button class="btn btn-primary" style="width:100%;padding:12px;margin-top:4px;" onclick="doLogin()">登入</button>
-    <div id="register-section" style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);display:none;">
-      <div style="font-size:12px;color:var(--accent);margin-bottom:8px;">🎉 首次使用，請建立管理員帳號</div>
-      <button class="btn btn-ghost" style="width:100%;padding:10px;font-size:13px;" onclick="doRegister()">建立帳號</button>
+    <button class="btn btn-primary" style="width:100%;padding:12px;" onclick="checkPassword()">進入</button>
+    <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);">
+      <div style="font-size:12px;color:var(--text3);margin-bottom:8px;">首次使用？設定登入密碼</div>
+      <input class="pw-input" type="password" id="pw-new" placeholder="新密碼" maxlength="20" style="margin-bottom:8px;letter-spacing:2px;">
+      <button class="btn btn-ghost" style="width:100%;padding:10px;font-size:13px;" onclick="setPassword()">設定密碼</button>
     </div>
+    <div id="pw-set-msg" style="font-size:12px;color:var(--accent);margin-top:8px;min-height:16px;"></div>
   </div>
 </div>
 
@@ -336,10 +335,10 @@
       <span class="nav-icon">🔐</span><span>帳密管理</span>
     </div>
   </nav>
-  <div style="padding:10px 12px;border-top:1px solid var(--border);display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+  <div style="padding:10px 12px;border-top:1px solid var(--border);display:grid;grid-template-columns:1fr 1fr;gap:5px;">
     <button class="btn btn-ghost btn-sm" style="font-size:11px;" onclick="exportData()">📤 備份</button>
     <button class="btn btn-ghost btn-sm" style="font-size:11px;" onclick="document.getElementById('import-file').click()">📥 還原</button>
-    <button class="btn btn-ghost btn-sm" style="font-size:11px;grid-column:span 2;color:var(--red);" onclick="doLogout()">🚪 登出</button>
+    <button class="btn btn-ghost btn-sm" style="font-size:11px;grid-column:span 2;color:var(--red);margin-top:2px;" onclick="doLogout()">🚪 登出</button>
   </div>
 </div>
 
@@ -388,16 +387,21 @@
   <div class="page" id="page-accounts">
     <div class="page-header flex-between">
       <div>
-        <div class="page-title">帳號管理</div>
+        <div class="page-title">🏦 帳號管理</div>
         <div class="page-sub">管理所有球類帳號及分成設定</div>
       </div>
-      <button class="btn btn-primary" onclick="openAccountModal()">＋ 新增帳號</button>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text3);cursor:pointer;">
+          <input type="checkbox" id="acc-show-disabled" onchange="renderAccounts()"> 顯示停用帳號
+        </label>
+        <button class="btn btn-primary" onclick="openAccountModal()">＋ 新增帳號</button>
+      </div>
     </div>
     <div class="card">
       <div class="table-wrap">
         <table id="accounts-table">
           <thead><tr>
-            <th>帳號</th><th>站台</th><th>帳號類型</th><th>我的佔成%</th><th>流水退水</th><th>月獲利退上線%</th><th>分成明細</th><th>操作</th>
+            <th>帳號</th><th>類型</th><th>本週</th><th>交收對象</th><th>我佔成</th><th>下線分成</th><th>退水</th><th>本月月退金額</th><th>操作</th>
           </tr></thead>
           <tbody id="accounts-body"></tbody>
         </table>
@@ -529,23 +533,39 @@
             <option value="539">539</option>
           </select>
         </div>
-        <div class="form-group"><label>我的佔成 (%)</label><input id="a-mypct" type="number" min="0" max="100" placeholder="0-100"></div>
+        <div class="form-group">
+          <label>交收對象 <span style="color:var(--text3);font-size:11px;">誰給我這個帳號（跟誰結算）</span></label>
+          <select id="a-counterparty"><option value="">-- 無 --</option></select>
+        </div>
+        <div class="form-group">
+          <label>交收佔成 (%) <span style="color:var(--text3);font-size:11px;">交收對象的佔成</span></label>
+          <input id="a-counterparty-pct" type="number" min="0" max="100" placeholder="如 80" oninput="updateMyPct()">
+        </div>
+      </div>
+      <div class="form-grid form-grid-2">
+        <div class="form-group">
+          <label>我的佔成 (%) <span style="color:var(--text3);font-size:11px;">自動 = 交收% - 下線合計%</span></label>
+          <input id="a-mypct" type="number" min="0" max="100" placeholder="自動計算" style="background:var(--surface);opacity:.7;" readonly>
+        </div>
         <div class="form-group"><label>上線(給我帳號的人)</label>
           <select id="a-upline"><option value="">-- 無/自己的帳號 --</option></select>
         </div>
       </div>
       <div id="a-rebate-section" style="display:none;">
         <div class="form-grid form-grid-2" style="margin-bottom:8px;">
-          <div class="form-group"><label>流水退水 <span style="color:var(--text3);font-size:11px;">每萬退多少（如110或115）</span></label><input id="a-rebate" type="number" placeholder="如 110"></div>
-          <div class="form-group"><label>我的月退給上線 (%) <span style="color:var(--text3);font-size:11px;">我獲利後退給上線</span></label><input id="a-monthly-ret" type="number" min="0" max="100" placeholder="0"></div>
+          <div class="form-group"><label>交收退水（收） <span style="color:var(--text3);font-size:11px;">交收對象退給我每萬多少（如110）</span></label><input id="a-rebate" type="number" placeholder="如 110"></div>
+          <div class="form-group"><label>交收對象月退% <span style="color:var(--text3);font-size:11px;">交收對象獲利後退給我</span></label><input id="a-monthly-ret" type="number" min="0" max="100" placeholder="0"></div>
         </div>
       </div>
     </div>
     <hr class="divider">
-    <div class="card-title">下線分成設定</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <div class="card-title" style="margin:0;">下線分成設定</div>
+      <div id="pct-check" style="font-size:12px;color:var(--text3);"></div>
+    </div>
     <div class="share-list" id="share-list">
       <div class="share-header" style="display:grid;grid-template-columns:1fr 80px 80px 80px 36px;gap:6px;font-size:11px;color:var(--text3);padding:0 2px;">
-        <span>人員</span><span style="text-align:center">佔成%</span><span style="text-align:center">退水/萬</span><span style="text-align:center">月退%</span><span></span>
+        <span>人員</span><span style="text-align:center">佔成%</span><span style="text-align:center">我退他/萬</span><span style="text-align:center">月退%</span><span></span>
       </div>
     </div>
     <button class="btn btn-ghost btn-sm mt-8" onclick="addShareRow()">＋ 新增下線</button>
@@ -615,8 +635,8 @@
         </div>
       </div>
       <div class="form-group" id="r-flow-group" style="display:none;">
-        <label>百家樂流水 <span style="color:var(--text3);font-size:11px;">每萬退水自動計算</span></label>
-        <input type="number" id="r-flow" placeholder="如 500000" value="0" oninput="calcPreview()">
+        <label>百家樂流水（元） <span style="color:var(--text3);font-size:11px;">如10萬流水請輸入100000</span></label>
+        <input type="number" id="r-flow" placeholder="如 100000" value="0" oninput="calcPreview()">
       </div>
       <div class="form-group"><label>備註</label><input id="r-note" placeholder="選填"></div>
     </div>
@@ -639,71 +659,10 @@ let DB = {
   _editRecordIdx: -1,
 };
 
-function save() { localStorage.setItem('ballDB', JSON.stringify(DB)); }
-
-function exportData() {
-  const all = {
-    ballDB: DB,
-    ballDB_passwords: JSON.parse(localStorage.getItem('ballDB_passwords') || '[]'),
-    exportedAt: new Date().toISOString(),
-  };
-  const blob = new Blob([JSON.stringify(all, null, 2)], {type:'application/json'});
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = '球帳備份_' + new Date().toISOString().slice(0,10) + '.json';
-  a.click();
-  toast('✅ 已匯出備份');
-}
-
-function importData(file) {
-  const reader = new FileReader();
-  reader.onload = e => {
-    try {
-      const all = JSON.parse(e.target.result);
-      if(all.ballDB) {
-        DB = all.ballDB;
-        localStorage.setItem('ballDB', JSON.stringify(DB));
-        localStorage.setItem('ballDB_v2_cleared', '1');
-      }
-      if(all.ballDB_passwords) {
-        localStorage.setItem('ballDB_passwords', JSON.stringify(all.ballDB_passwords));
-      }
-      renderDashboard(); renderAccounts(); renderContacts(); renderRecords();
-      toast('✅ 匯入成功');
-    } catch(err) {
-      toast('❌ 匯入失敗：格式錯誤');
-    }
-  };
-  reader.readAsText(file);
-}
-
-function load() {
-  const d = localStorage.getItem('ballDB');
-  // One-time clear: remove old incompatible records
-  const cleared = localStorage.getItem('ballDB_v2_cleared');
-  if(d) {
-    try {
-      DB = JSON.parse(d);
-      if(!cleared) {
-        // Clear all old records on first load of this version
-        DB.records = [];
-        localStorage.setItem('ballDB_v2_cleared', '1');
-      }
-      // Keep accounts and contacts, migrate if needed
-      if(!DB.contacts) DB.contacts = [];
-      if(!DB.accounts) DB.accounts = [];
-      if(!DB.records) DB.records = [];
-    } catch(e) {
-      console.error('DB load error', e);
-      DB = { contacts:[], accounts:[], records:[], _editAccountIdx:-1, _editRecordIdx:-1 };
-    }
-  } else {
-    // First time ever - mark as cleared
-    localStorage.setItem('ballDB_v2_cleared', '1');
-  }
-}
-
-load();
+// save() and load() are replaced by API calls below (after API HELPERS section)
+// Stub so any legacy calls don't crash before API helpers load
+function save() { _apiSave(); }
+function load() { /* no-op, replaced by loadFromServer() */ }
 
 // ========== NAV ==========
 function goPage(name) {
@@ -738,7 +697,34 @@ document.addEventListener('click', e => {
   if(!e.target.closest('#more-menu') && !e.target.closest('#bn-more')) hideMoreMenu();
 });
 
-// ========== PASSWORD SYSTEM (handled by server API) ==========
+// ========== PASSWORD SYSTEM ==========
+const PW_KEY = 'ballDB_pw';
+
+function checkPassword() {
+  const input = document.getElementById('pw-input').value;
+  const stored = localStorage.getItem(PW_KEY);
+  if(!stored) {
+    // No password set yet - let them in
+    document.getElementById('pw-overlay').style.display = 'none';
+    return;
+  }
+  if(input === stored) {
+    document.getElementById('pw-overlay').style.display = 'none';
+  } else {
+    document.getElementById('pw-error').textContent = '密碼錯誤，請再試一次';
+    document.getElementById('pw-input').value = '';
+    document.getElementById('pw-input').focus();
+  }
+}
+
+function setPassword() {
+  const np = document.getElementById('pw-new').value.trim();
+  if(!np) { document.getElementById('pw-set-msg').textContent = '請輸入密碼'; return; }
+  localStorage.setItem(PW_KEY, np);
+  document.getElementById('pw-set-msg').textContent = '✅ 密碼已設定';
+  document.getElementById('pw-new').value = '';
+  setTimeout(() => document.getElementById('pw-set-msg').textContent = '', 2000);
+}
 
 // ========== PASSWORD MANAGER ==========
 function showPwManager() {
@@ -746,82 +732,7 @@ function showPwManager() {
   document.getElementById('modal-pwmanager').classList.add('open');
 }
 
-function renderPwList() {
-  const entries = JSON.parse(localStorage.getItem('ballDB_passwords') || '[]');
-  const el = document.getElementById('pwm-list');
-  if(!entries.length) {
-    el.innerHTML = '<div style="text-align:center;color:var(--text3);padding:20px;font-size:13px;">尚無記錄</div>';
-    return;
-  }
-  el.innerHTML = entries.map((e, i) => `
-    <div style="background:var(--surface2);border-radius:8px;padding:10px 12px;margin-bottom:8px;position:relative;">
-      <div style="display:flex;justify-content:space-between;align-items:start;">
-        <div>
-          <div style="font-weight:700;font-size:14px;">${e.site}</div>
-          <div style="font-size:13px;color:var(--text2);margin-top:2px;">帳號：${e.account}</div>
-          <div style="font-size:13px;color:var(--text2);display:flex;align-items:center;gap:6px;">
-            密碼：<span id="pwm-pw-${i}" style="letter-spacing:3px;">••••••</span>
-            <button class="btn btn-ghost btn-sm" style="padding:2px 8px;font-size:11px;" onclick="togglePw(${i})">顯示</button>
-            <span style="display:none;" id="pwm-real-${i}">${e.password}</span>
-          </div>
-          ${e.note ? `<div style="font-size:12px;color:var(--text3);margin-top:2px;">${e.note}</div>` : ''}
-        </div>
-        <button class="btn btn-danger btn-sm" onclick="deletePwEntry(${i})">刪除</button>
-      </div>
-    </div>`).join('');
-}
 
-function togglePw(i) {
-  const dot = document.getElementById('pwm-pw-'+i);
-  const real = document.getElementById('pwm-real-'+i);
-  if(dot.textContent === '••••••') {
-    dot.textContent = real.textContent;
-    dot.style.letterSpacing = 'normal';
-  } else {
-    dot.textContent = '••••••';
-    dot.style.letterSpacing = '3px';
-  }
-}
-
-function savePwEntry() {
-  const site = document.getElementById('pwm-site').value.trim();
-  const account = document.getElementById('pwm-account').value.trim();
-  const password = document.getElementById('pwm-password').value.trim();
-  if(!site || !account || !password) { toast('請填寫網站、帳號、密碼'); return; }
-  const entries = JSON.parse(localStorage.getItem('ballDB_passwords') || '[]');
-  entries.push({ site, account, password, note: document.getElementById('pwm-note').value.trim() });
-  localStorage.setItem('ballDB_passwords', JSON.stringify(entries));
-  document.getElementById('pwm-site').value = '';
-  document.getElementById('pwm-account').value = '';
-  document.getElementById('pwm-password').value = '';
-  document.getElementById('pwm-note').value = '';
-  renderPwList();
-  toast('✅ 已儲存');
-}
-
-function changeSystemPw() {
-  const oldPw = document.getElementById('pwm-change-old').value;
-  const newPw = document.getElementById('pwm-change-new').value.trim();
-  const stored = localStorage.getItem('ballDB_pw') || '';
-  const msg = document.getElementById('pwm-change-msg');
-  if(stored && oldPw !== stored) {
-    msg.style.color = 'var(--red)'; msg.textContent = '❌ 舊密碼錯誤'; return;
-  }
-  if(!newPw) { msg.style.color = 'var(--red)'; msg.textContent = '請輸入新密碼'; return; }
-  localStorage.setItem('ballDB_pw', newPw);
-  msg.style.color = 'var(--accent)'; msg.textContent = '✅ 密碼已更新';
-  document.getElementById('pwm-change-old').value = '';
-  document.getElementById('pwm-change-new').value = '';
-  setTimeout(() => msg.textContent = '', 2500);
-}
-
-function deletePwEntry(i) {
-  const entries = JSON.parse(localStorage.getItem('ballDB_passwords') || '[]');
-  entries.splice(i, 1);
-  localStorage.setItem('ballDB_passwords', JSON.stringify(entries));
-  renderPwList();
-  toast('已刪除');
-}
 
 // ========== UTILS ==========
 function fmt(n) {
@@ -908,38 +819,64 @@ function onAccountTypeChange() {
 function openAccountModal(idx=-1) {
   DB._editAccountIdx = idx;
   document.getElementById('account-modal-title').textContent = idx>=0?'編輯帳號':'新增帳號';
-  // populate upline select
+
+  const shareHeader = `<div class="share-header" style="display:grid;grid-template-columns:1fr 80px 80px 80px 36px;gap:6px;font-size:11px;color:var(--text3);padding:0 2px;">
+    <span>人員</span><span style="text-align:center">佔成%</span><span style="text-align:center">我退他/萬</span><span style="text-align:center">月退%</span><span></span>
+  </div>`;
+
+  // populate selects
   const ul = document.getElementById('a-upline');
   ul.innerHTML = '<option value="">-- 無/自己的帳號 --</option>';
-  DB.contacts.forEach(c=>{
-    if(c.role==='upline') ul.innerHTML += `<option value="${c.name}">${c.name}</option>`;
+  const cp = document.getElementById('a-counterparty');
+  cp.innerHTML = '<option value="">-- 無 --</option>';
+  DB.contacts.forEach(c => {
+    ul.innerHTML += `<option value="${c.name}">${c.name}</option>`;
+    cp.innerHTML += `<option value="${c.name}">${c.name}</option>`;
   });
-  // clear
-  if(idx<0) {
-    ['a-name','a-site','a-mypct','a-rebate','a-monthly-ret'].forEach(id=>document.getElementById(id).value='');
+
+  if(idx < 0) {
+    ['a-name','a-site','a-mypct','a-rebate','a-monthly-ret','a-counterparty-pct'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('a-upline').value='';
+    document.getElementById('a-counterparty').value='';
     document.getElementById('a-type').value='sports';
     document.getElementById('a-rebate-section').style.display='none';
-    document.getElementById('share-list').innerHTML=`
-      <div style="display:grid;grid-template-columns:1fr 100px 80px 36px;gap:8px;font-size:11px;color:var(--text3);padding:0 2px;">
-        <span>人員</span><span style="text-align:center">佔成%</span><span style="text-align:center">退水(萬)</span><span></span>
-      </div>`;
+    document.getElementById('share-list').innerHTML = shareHeader;
   } else {
     const a = DB.accounts[idx];
     document.getElementById('a-name').value = a.name;
-    document.getElementById('a-site').value = a.site;
-    document.getElementById('a-type').value = a.type;
-    document.getElementById('a-rebate-section').style.display = a.type==='baccarat' ? '' : 'none';
-    document.getElementById('a-mypct').value = a.myPct;
-    document.getElementById('a-rebate').value = a.rebate;
-    document.getElementById('a-monthly-ret').value = a.monthlyRet;
+    document.getElementById('a-site').value = a.site||'';
+    document.getElementById('a-type').value = a.type||'sports';
+    document.getElementById('a-rebate').value = a.rebate||'';
+    document.getElementById('a-monthly-ret').value = a.monthlyRet||'';
+    document.getElementById('a-counterparty').value = a.counterparty||'';
+    document.getElementById('a-counterparty-pct').value = a.counterpartyPct||'';
     ul.value = a.upline||'';
-    document.getElementById('share-list').innerHTML=`
-      <div style="display:grid;grid-template-columns:1fr 100px 80px 36px;gap:8px;font-size:11px;color:var(--text3);padding:0 2px;">
-        <span>人員</span><span style="text-align:center">佔成%</span><span style="text-align:center">退水(萬)</span><span></span>
-      </div>`;
+    document.getElementById('a-rebate-section').style.display = a.type==='baccarat' ? '' : 'none';
+    document.getElementById('share-list').innerHTML = shareHeader;
     (a.shares||[]).forEach(s=>addShareRow(s));
   }
+  updateMyPct();
   document.getElementById('modal-account').classList.add('open');
+}
+
+function updateMyPct() {
+  const cpPct = parseFloat(document.getElementById('a-counterparty-pct').value)||0;
+  // Sum all share rows' pct inputs
+  const rows = document.querySelectorAll('#share-list .share-row');
+  let shareSum = 0;
+  rows.forEach(row => {
+    const ins = row.querySelectorAll('input');
+    shareSum += parseFloat(ins[0]?.value)||0;
+  });
+  const myPct = cpPct - shareSum;
+  document.getElementById('a-mypct').value = myPct > 0 ? myPct : 0;
+  const chk = document.getElementById('pct-check');
+  if(chk) {
+    if(cpPct === 0) { chk.textContent=''; return; }
+    const ok = Math.abs(shareSum + myPct - cpPct) < 0.01;
+    chk.textContent = ok ? `✅ 合計${cpPct}%` : `⚠️ 下線${shareSum}% + 我${myPct}% = ${shareSum+myPct}%（應等於${cpPct}%）`;
+    chk.style.color = ok ? 'var(--accent)' : 'var(--yellow)';
+  }
 }
 
 function addShareRow(data={}) {
@@ -947,14 +884,15 @@ function addShareRow(data={}) {
   div.className='share-row';
   const opts = DB.contacts.map(c=>`<option value="${c.name}" ${c.name==data.name?'selected':''}>${c.name}</option>`).join('');
   div.style.gridTemplateColumns = '1fr 80px 80px 80px 36px';
+  const iStyle = 'text-align:center;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:8px;font-size:13px;width:100%;box-sizing:border-box;';
   div.innerHTML = `
     <select style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:8px 10px;font-size:13px;outline:none;">
       <option value="">-- 選人 --</option>${opts}
     </select>
-    <input type="number" min="0" max="100" placeholder="%" value="${data.pct||''}" style="text-align:center;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:8px;font-size:13px;">
-    <input type="number" min="0" placeholder="退水" value="${data.rebate||''}" style="text-align:center;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:8px;font-size:13px;">
-    <input type="number" min="0" max="100" placeholder="月退%" value="${data.monthlyRet||''}" style="text-align:center;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:8px;font-size:13px;">
-    <button class="icon-btn" onclick="this.parentElement.remove()">✕</button>
+    <input type="number" min="0" max="100" placeholder="%" value="${data.pct||''}" style="${iStyle}" oninput="updateMyPct()">
+    <input type="number" min="0" placeholder="退水" value="${data.rebate||''}" style="${iStyle}">
+    <input type="number" min="0" max="100" placeholder="月退%" value="${data.monthlyRet||''}" style="${iStyle}">
+    <button class="icon-btn" onclick="this.parentElement.remove();updateMyPct()">✕</button>
   `;
   document.getElementById('share-list').appendChild(div);
 }
@@ -962,6 +900,8 @@ function addShareRow(data={}) {
 function saveAccount() {
   const name = document.getElementById('a-name').value.trim();
   if(!name) { toast('請填帳號名稱'); return; }
+  const counterparty = document.getElementById('a-counterparty').value;
+  const counterpartyPct = parseFloat(document.getElementById('a-counterparty-pct').value)||0;
   const myPct = parseFloat(document.getElementById('a-mypct').value)||0;
   const shares = [];
   document.querySelectorAll('#share-list .share-row').forEach(row=>{
@@ -972,7 +912,8 @@ function saveAccount() {
   const obj = {
     name, site: document.getElementById('a-site').value,
     type: document.getElementById('a-type').value,
-    myPct, upline: document.getElementById('a-upline').value,
+    myPct, counterparty, counterpartyPct,
+    upline: document.getElementById('a-upline').value,
     rebate: parseFloat(document.getElementById('a-rebate').value)||0,
     monthlyRet: parseFloat(document.getElementById('a-monthly-ret').value)||0,
     shares
@@ -982,32 +923,106 @@ function saveAccount() {
   save(); closeModal('modal-account'); renderAccounts(); toast('已儲存帳號');
 }
 
+function getThisWeekKey(type) {
+  const today = new Date().toISOString().slice(0,10);
+  return getWeekKeyForRecord(today, type);
+}
+
 function renderAccounts() {
   const typeLabel={sports:'體育投注',baccarat:'百家樂','539':'539'};
   const tbody=document.getElementById('accounts-body');
-  if(!DB.accounts.length) { tbody.innerHTML='<tr><td colspan=8 style="text-align:center;padding:30px;color:var(--text3)">尚無帳號</td></tr>'; return; }
-  const accTable = document.getElementById('accounts-body');
-  accTable.parentElement.onclick = function(e) {
-    const btn = e.target.closest('.acc-del');
-    if(btn) {
-      const i = parseInt(btn.dataset.idx);
+  // Filter: show active by default, hidden if disabled
+  const showDisabled = document.getElementById('acc-show-disabled')?.checked;
+  const visible = DB.accounts.filter((a,i) => showDisabled || !a.disabled);
+
+  if(!visible.length) {
+    tbody.innerHTML=`<tr><td colspan=9 style="text-align:center;padding:30px;color:var(--text3)">${showDisabled?'尚無帳號':'沒有啟用中的帳號'}</td></tr>`;
+    return;
+  }
+
+  // Build week-record map: accountName -> thisWeek record
+  const weekRecords = {};
+  DB.records.forEach(r => {
+    const acc = DB.accounts.find(a => a.name === r.account && a.site === r.site);
+    if(!acc) return;
+    const thisWk = getThisWeekKey(r.accountType);
+    if(r.weekKey === thisWk) weekRecords[r.account + '|' + (r.site||'')] = r;
+  });
+
+  tbody.parentElement.onclick = function(e) {
+    const delBtn = e.target.closest('.acc-del');
+    const disBtn = e.target.closest('.acc-toggle-dis');
+    const mrSave = e.target.closest('.acc-mr-save');
+    if(delBtn) {
+      const i = parseInt(delBtn.dataset.idx);
       DB.accounts.splice(i,1); save(); renderAccounts(); toast('✅ 已刪除帳號');
     }
+    if(disBtn) {
+      const i = parseInt(disBtn.dataset.idx);
+      DB.accounts[i].disabled = !DB.accounts[i].disabled;
+      save(); renderAccounts();
+      toast(DB.accounts[i]?.disabled ? '已停用帳號' : '已啟用帳號');
+    }
+    if(mrSave) {
+      const i = parseInt(mrSave.dataset.idx);
+      const val = parseFloat(document.getElementById('mr-input-'+i).value) || 0;
+      if(!DB.accounts[i].monthRetEntries) DB.accounts[i].monthRetEntries = [];
+      const ym = new Date().toISOString().slice(0,7);
+      const existing = DB.accounts[i].monthRetEntries.find(e => e.ym === ym);
+      if(existing) existing.amount = val;
+      else DB.accounts[i].monthRetEntries.push({ ym, amount: val });
+      save(); toast('✅ 月退已儲存');
+    }
   };
-  tbody.innerHTML = DB.accounts.map((a,i)=>{
-    const sharesStr = a.shares.length ? a.shares.map(s=>`${s.name}${s.pct}%`).join('、') : '-';
+
+  const realIdx = (visIdx) => DB.accounts.indexOf(visible[visIdx]);
+
+  tbody.innerHTML = visible.map((a, vi) => {
+    const i = realIdx(vi);
+    const key = a.name + '|' + (a.site||'');
+    const thisWkRec = weekRecords[key];
+    const typeCls = {sports:'badge-yellow',baccarat:'badge-blue','539':'badge-green'}[a.type]||'badge-blue';
+    const sharesStr = (a.shares||[]).length ? a.shares.map(s=>`${s.name} ${s.pct}%`).join('、') : '-';
     const rebateStr = (a.type==='baccarat' && a.rebate>0) ? `每萬退${a.rebate}` : '-';
-    const mretStr = (a.type==='baccarat' && a.monthlyRet>0) ? `退上線${a.monthlyRet}%` : '-';
-    return `<tr>
-      <td><b>${a.name}</b></td>
-      <td>${a.site||'-'}</td>
-      <td><span class="badge badge-blue">${typeLabel[a.type]}</span></td>
-      <td class="mono text-green">${a.myPct}%</td>
-      <td style="color:var(--text2)">${rebateStr}</td>
-      <td style="color:var(--text2)">${mretStr}</td>
+    const cpStr = a.counterparty ? `<span style="color:var(--accent2)">${a.counterparty}</span> <span style="color:var(--text3)">${a.counterpartyPct}%</span>` : '-';
+    const disStyle = a.disabled ? 'opacity:0.45;' : '';
+
+    // Week status badge
+    let wkBadge;
+    if(a.disabled) {
+      wkBadge = '<span class="badge" style="background:#444;color:#999;font-size:10px;">停用</span>';
+    } else if(thisWkRec) {
+      const pnl = thisWkRec.myPnl || 0;
+      const cls = pnl >= 0 ? 'text-green' : 'text-red';
+      wkBadge = `<span class="badge badge-green" style="font-size:10px;">✅ 已記</span><br><span class="mono ${cls}" style="font-size:11px;">${fmt(pnl)}</span>`;
+    } else {
+      wkBadge = '<span class="badge badge-red" style="font-size:10px;">⚠️ 未記</span>';
+    }
+
+    // Monthly ret input for this month
+    const ym = new Date().toISOString().slice(0,7);
+    const mrEntry = (a.monthRetEntries||[]).find(e => e.ym === ym);
+    const mrVal = mrEntry ? mrEntry.amount : '';
+
+    return `<tr style="${disStyle}">
+      <td><b>${a.name}</b>${a.site?`<br><span class="text-sm">${a.site}</span>`:''}</td>
+      <td><span class="badge ${typeCls}" style="font-size:11px;">${typeLabel[a.type]||a.type}</span></td>
+      <td>${wkBadge}</td>
+      <td>${cpStr}</td>
+      <td class="mono text-green">${a.myPct||0}%</td>
       <td style="color:var(--text3);font-size:12px;">${sharesStr}</td>
-      <td style="display:flex;gap:6px;">
-        <button class="btn btn-ghost btn-sm" onclick="openAccountModal(${i})">編輯</button>
+      <td style="color:var(--text2)">${rebateStr}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:4px;">
+          <input id="mr-input-${i}" type="number" placeholder="金額" value="${mrVal}"
+            style="width:80px;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:4px 6px;font-size:12px;outline:none;">
+          <button class="btn btn-ghost btn-sm acc-mr-save" data-idx="${i}" style="font-size:11px;padding:4px 8px;">存</button>
+        </div>
+        ${mrVal ? `<div style="font-size:11px;color:var(--text3);margin-top:2px;">${ym} 已記 ${mrVal.toLocaleString()}</div>` : ''}
+      </td>
+      <td style="white-space:nowrap;">
+        <button class="btn btn-ghost btn-sm" onclick="openAccountModal(${i})" style="margin-bottom:3px;">編輯</button>
+        <button class="btn btn-ghost btn-sm acc-toggle-dis" data-idx="${i}" style="margin-bottom:3px;${a.disabled?'color:var(--accent);':'color:var(--text3);'}">${a.disabled?'啟用':'停用'}</button>
         <button class="btn btn-danger btn-sm acc-del" data-idx="${i}">刪除</button>
       </td>
     </tr>`;
@@ -1183,40 +1198,102 @@ function populateWeekSelect(aIdx, selectedKey) {
 //   下線A佔10% → 給A = 20000 * 10% = 2000（只算名義）
 //
 function computeBreakdown(account, winloss, sportsRebate, flow) {
-  // 從我的角度：
-  // amount < 0 = 我付給他（我欠）
-  // amount > 0 = 他欠我（他付給我）
+  // 輸贏：正=客人贏（我付錢給交收對象），負=客人輸（交收對象付我）
+  // 流水單位：元（10萬流水 = 100000）
+  // 水 = flow/10000 × rebate
   //
-  // 客人輸（winloss<0）→ nominalWL<0 → nominalWL*pct/100<0 → 我付給下線 ✓
-  // 客人贏（winloss>0）→ nominalWL>0 → nominalWL*pct/100>0 → 下線欠我 ✓
-  // 我的損益 = -nominalWL*myPct/100 + 水（水全歸我）
+  // amount 正 = 該人欠我（我收入）
+  // amount 負 = 我欠該人（我付出）
+  //
+  // 我的總損益 = sum(所有非我的 amount)
+  //   交收對象 amount = -(winloss+water) × pct%  （客人贏→負，客人輸→正）
+  //   下線     amount = +(winloss+water) × pct%  （客人贏→正，客人輸→負）
+  //   我的損益 = 交收對象amount + 下線amount 的總和
 
   const isBacc = account.type === 'baccarat';
-  const sr = isBacc ? 0 : (sportsRebate || 0);
-  const nominalWL = winloss + sr;
-
+  const f = flow || 0;
   const result = [];
 
-  (account.shares || []).forEach(sh => {
-    const shRebate = isBacc ? (flow / 10000) * (sh.rebate > 0 ? sh.rebate : (account.rebate || 0)) : 0;
-    const amount = nominalWL * (sh.pct / 100) + shRebate;
-    result.push({
-      contactName: sh.name,
-      label: `${sh.name}（佔${sh.pct}%${shRebate ? '，退水+' + fmtAbs(shRebate) : ''}）`,
-      amount,
-      isShare: true,
+  if (isBacc) {
+    const myRebateRate = account.rebate || 0;
+    let myPnl = 0;
+
+    // 交收對象
+    if (account.counterparty && account.counterpartyPct > 0) {
+      const water = (f / 10000) * myRebateRate;
+      const amount = -((winloss + water) * account.counterpartyPct / 100);
+      myPnl += amount; // 負=我付出，正=我收入
+      result.push({
+        contactName: account.counterparty,
+        label: `${account.counterparty}（交收${account.counterpartyPct}%，退水${myRebateRate}/萬）`,
+        amount,
+        isCounterparty: true,
+      });
+    }
+
+    // 下線
+    (account.shares || []).forEach(sh => {
+      const shRate = sh.rebate > 0 ? sh.rebate : myRebateRate;
+      const water = (f / 10000) * shRate;
+      const amount = (winloss + water) * sh.pct / 100;
+      myPnl += amount; // 正=下線欠我，負=我欠下線
+      result.push({
+        contactName: sh.name,
+        label: `${sh.name}（${sh.pct}%，退水${shRate}/萬）`,
+        amount,
+        isShare: true,
+      });
     });
-  });
 
-  const myRebate = isBacc ? (flow / 10000) * (account.rebate || 0) : 0;
-  const myAmount = -nominalWL * (account.myPct / 100) + sr + myRebate;
+    // 我的損益 = 交收對象+下線 所有金額加總
+    result.unshift({
+      contactName: '__ME__',
+      label: `我（${account.myPct||0}%，水差獲利含在內）`,
+      amount: myPnl,
+      isMe: true,
+    });
 
-  result.unshift({
-    contactName: '__ME__',
-    label: `我（佔${account.myPct}%${sr ? '，水+'+fmtAbs(sr) : ''}${myRebate ? '，退水+'+fmtAbs(myRebate) : ''}）`,
-    amount: myAmount,
-    isMe: true,
-  });
+  } else {
+    // 體育/539 水邏輯：
+    //   名義輸贏 = winloss + sportsRebate
+    //   （客人輸10000，水3000 → winloss=-10000, sr=3000 → 名義=-7000）
+    //   下線/交收按「名義輸贏」算佔成
+    //   水全歸我個人，不按佔成分出去
+    //   向客人收款 = -winloss（純輸贏，不含水）
+    const sr = sportsRebate || 0;
+    const nominalWL = winloss + sr; // 名義輸贏
+    let myPnl = sr; // 水先全歸我
+
+    if (account.counterparty && account.counterpartyPct > 0) {
+      const amount = -(nominalWL * account.counterpartyPct / 100);
+      myPnl += amount;
+      result.push({
+        contactName: account.counterparty,
+        label: `${account.counterparty}（交收${account.counterpartyPct}%，名義輸贏）`,
+        amount,
+        isCounterparty: true,
+      });
+    }
+
+    (account.shares || []).forEach(sh => {
+      const amount = nominalWL * sh.pct / 100;
+      myPnl += amount;
+      result.push({
+        contactName: sh.name,
+        label: `${sh.name}（${sh.pct}%，名義輸贏）`,
+        amount,
+        isShare: true,
+      });
+    });
+
+    myPnl += nominalWL * (account.myPct || 0) / 100;
+    result.unshift({
+      contactName: '__ME__',
+      label: `我（${account.myPct||0}%${sr ? '，含水+' + fmtAbs(sr) : ''}）`,
+      amount: myPnl,
+      isMe: true,
+    });
+  }
 
   return result;
 }
@@ -1669,29 +1746,40 @@ function renderReport() {
       const a=DB.accounts.find(ac=>ac.name===an);
       if(!a) return;
       const recsByAcc=m.records.filter(r=>r.account===an);
-      const accPnl=recsByAcc.reduce((s,r)=>s+r.myPnl,0);
-      // My monthly ret to upline
-      if(a.monthlyRet>0 && accPnl>0) {
-        const retAmt=accPnl*(a.monthlyRet/100);
-        monthRetTotal+=retAmt;
-        monthRetDetails.push({acc:an, upline:a.upline||'上線', pct:a.monthlyRet, amt:retAmt, dir:'我退給上線'});
+
+      // 交收對象月退：交收對象這個月有獲利（欠我的為正），按月退%退給我
+      if(a.counterparty && a.monthlyRet>0) {
+        const cpPnl = recsByAcc.reduce((s,r)=>{
+          const b=(r.breakdown||[]).find(b=>b.contactName===a.counterparty&&b.isCounterparty);
+          return s+(b?b.amount:0);
+        },0);
+        if(cpPnl>0) {
+          const retAmt=cpPnl*(a.monthlyRet/100);
+          monthRetTotal+=retAmt;
+          monthRetDetails.push({acc:an, who:a.counterparty, pct:a.monthlyRet, amt:retAmt, dir:`${a.counterparty}月退給我`});
+        }
       }
-      // Per-share person monthly ret (they pay me if profitable, or I pay them)
+
+      // 下線月退：下線這個月有獲利（欠我為正），按月退%退給我
       (a.shares||[]).forEach(sh=>{
-        if(sh.monthlyRet>0 && accPnl>0) {
-          // 下線的月退：下線的損益是他欠我的（若客人輸，他欠我）
-          // 若這個帳號我獲利，下線也要依他的佔成退月退給我
-          const shPnlTotal = recsByAcc.reduce((s,r)=>{
-            const b = (r.breakdown||[]).find(b=>b.contactName===sh.name);
-            return s + (b ? b.amount : 0);
-          },0);
-          if(shPnlTotal>0) {
-            // 下線欠我的正數，若有月退，下線多退一些給我
-            const retAmt = shPnlTotal*(sh.monthlyRet/100);
-            monthRetDetails.push({acc:an, upline:sh.name, pct:sh.monthlyRet, amt:retAmt, dir:`${sh.name}月退給我`});
-          }
+        if(sh.monthlyRet<=0) return;
+        const shPnl = recsByAcc.reduce((s,r)=>{
+          const b=(r.breakdown||[]).find(b=>b.contactName===sh.name&&b.isShare);
+          return s+(b?b.amount:0);
+        },0);
+        if(shPnl>0) {
+          const retAmt=shPnl*(sh.monthlyRet/100);
+          monthRetDetails.push({acc:an, who:sh.name, pct:sh.monthlyRet, amt:retAmt, dir:`${sh.name}月退給我`});
         }
       });
+
+      // 我的月退（我這個帳獲利，退給交收對象或上線）
+      const myPnl=recsByAcc.reduce((s,r)=>s+r.myPnl,0);
+      if(a.upline && a.monthlyRet>0 && !a.counterparty && myPnl>0) {
+        const retAmt=myPnl*(a.monthlyRet/100);
+        monthRetTotal-=retAmt;
+        monthRetDetails.push({acc:an, who:a.upline, pct:a.monthlyRet, amt:retAmt, dir:'我月退給上線'});
+      }
     });
     const incomingRet = monthRetDetails.filter(d=>d.dir&&d.dir.includes('給我')).reduce((s,d)=>s+d.amt,0);
     const outgoingRet = monthRetDetails.filter(d=>!d.dir||!d.dir.includes('給我')).reduce((s,d)=>s+d.amt,0);
@@ -1706,8 +1794,8 @@ function renderReport() {
           <div class="label" style="color:var(--yellow);">月獲利退給上線明細</div>
           ${monthRetDetails.map(d=>`
             <div style="display:flex;justify-content:space-between;font-size:12px;margin-top:6px;color:var(--text2);">
-              <span>${d.acc}｜${d.dir||d.upline} (${d.pct}%)</span>
-              <span class="mono ${d.dir&&d.dir.includes('給我')?'text-green':'text-red'}">${d.dir&&d.dir.includes('給我')?'+':'-'}${fmtAbs(d.amt)}</span>
+              <span>${d.acc}｜${d.dir} (${d.pct}%)</span>
+              <span class="mono ${d.dir.includes('給我')?'text-green':'text-red'}">${d.dir.includes('給我')?'+':'-'}${fmtAbs(d.amt)}</span>
             </div>`).join('')}
           <div style="display:flex;justify-content:space-between;margin-top:8px;padding-top:8px;border-top:1px solid rgba(251,191,36,.2);font-weight:700;font-size:14px;">
             <span style="color:var(--text);">退上線合計</span><span class="mono text-red">-${fmtAbs(monthRetTotal)}</span>
@@ -1894,35 +1982,32 @@ function printStatement() {
 }
 
 // ========== API HELPERS ==========
+let _saveTimer = null;
+function _apiSave() {
+  clearTimeout(_saveTimer);
+  _saveTimer = setTimeout(async () => {
+    try { await fetch('/api/data', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({data:DB})}); }
+    catch(e) { console.warn('Auto-save failed', e); }
+  }, 800);
+}
+
 async function apiGet(url) {
   const r = await fetch(url);
   if(r.status === 401) { showLogin(); throw new Error('Unauthorized'); }
   return r.json();
 }
 async function apiPost(url, body) {
-  const r = await fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+  const r = await fetch(url, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
   if(r.status === 401) { showLogin(); throw new Error('Unauthorized'); }
   return r.json();
 }
 async function apiDelete(url) {
-  const r = await fetch(url, { method:'DELETE' });
+  const r = await fetch(url, {method:'DELETE'});
   return r.json();
 }
 
 function showLogin() {
   document.getElementById('pw-overlay').style.display = 'flex';
-  // Check if first time (no users)
-  fetch('/api/me').then(r => {
-    if(r.status === 401) {
-      // Check if first-time setup needed
-      fetch('/api/register', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({__check:true})})
-        .then(r2 => r2.json()).then(d => {
-          if(d.error === '請填寫帳號和密碼') {
-            // Register endpoint accessible = no users yet
-          }
-        }).catch(()=>{});
-    }
-  });
 }
 
 async function doLogin() {
@@ -1931,7 +2016,7 @@ async function doLogin() {
   const errEl = document.getElementById('pw-error');
   if(!username || !password) { errEl.textContent = '請填寫帳號和密碼'; return; }
   try {
-    const r = await fetch('/api/login', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({username, password}) });
+    const r = await fetch('/api/login', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username,password})});
     const d = await r.json();
     if(d.ok) {
       document.getElementById('pw-overlay').style.display = 'none';
@@ -1950,34 +2035,30 @@ async function doRegister() {
   const errEl = document.getElementById('pw-error');
   if(!username || !password) { errEl.textContent = '請填寫帳號和密碼'; return; }
   try {
-    const r = await fetch('/api/register', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({username, password}) });
+    const r = await fetch('/api/register', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username,password})});
     const d = await r.json();
-    if(d.ok) { errEl.style.color='var(--accent)'; errEl.textContent = '帳號建立成功，請登入'; document.getElementById('register-section').style.display='none'; }
+    if(d.ok) { errEl.style.color='var(--accent)'; errEl.textContent='帳號建立成功，請重新登入'; document.getElementById('register-section').style.display='none'; }
     else errEl.textContent = d.error;
   } catch(e) { errEl.textContent = '連線錯誤'; }
 }
 
-// Override save/load to use server API
-function save() {
-  apiPost('/api/data', { data: DB }).catch(()=>{});
-}
-
 async function loadFromServer() {
   try {
-    const r = await apiGet('/api/data');
-    if(r.data) {
-      DB = r.data;
+    const r = await fetch('/api/data');
+    if(r.status === 401) { showLogin(); return; }
+    const data = await r.json();
+    if(data.data) {
+      DB = data.data;
       if(!DB.contacts) DB.contacts = [];
       if(!DB.accounts) DB.accounts = [];
       if(!DB.records) DB.records = [];
+      if(!DB._editAccountIdx) DB._editAccountIdx = -1;
+      if(!DB._editRecordIdx) DB._editRecordIdx = -1;
     }
-  } catch(e) {}
+  } catch(e) { console.error('loadFromServer failed', e); }
 }
 
-// Override export/import to use server API
-async function exportData() {
-  window.location.href = '/api/export';
-}
+async function exportData() { window.location.href = '/api/export'; }
 
 async function importData(file) {
   const reader = new FileReader();
@@ -1995,7 +2076,6 @@ async function importData(file) {
   reader.readAsText(file);
 }
 
-// Override password manager to use server API
 async function renderPwList() {
   const el = document.getElementById('pwm-list');
   el.innerHTML = '<div style="text-align:center;color:var(--text3);padding:16px;font-size:13px;">載入中...</div>';
@@ -2007,7 +2087,7 @@ async function renderPwList() {
         <div style="display:flex;justify-content:space-between;align-items:start;">
           <div>
             <div style="font-weight:700;font-size:14px;">${e.site}</div>
-            <div style="font-size:13px;color:var(--text2);margin-top:2px;">帳號：${e.account}</div>
+            <div style="font-size:13px;color:var(--text2);">帳號：${e.account}</div>
             <div style="font-size:13px;color:var(--text2);display:flex;align-items:center;gap:6px;">
               密碼：<span id="pwm-pw-${e.id}" style="letter-spacing:3px;">••••••</span>
               <button class="btn btn-ghost btn-sm" style="padding:2px 8px;font-size:11px;" onclick="togglePw('${e.id}','${e.password}')">顯示</button>
@@ -2031,7 +2111,7 @@ async function savePwEntry() {
   const account = document.getElementById('pwm-account').value.trim();
   const password = document.getElementById('pwm-password').value.trim();
   if(!site || !account || !password) { toast('請填寫網站、帳號、密碼'); return; }
-  await apiPost('/api/passwords', { site, account, password, note: document.getElementById('pwm-note').value.trim() });
+  await apiPost('/api/passwords', {site, account, password, note: document.getElementById('pwm-note').value.trim()});
   document.getElementById('pwm-site').value = '';
   document.getElementById('pwm-account').value = '';
   document.getElementById('pwm-password').value = '';
@@ -2050,15 +2130,14 @@ async function changeSystemPw() {
   const oldPassword = document.getElementById('pwm-change-old').value;
   const newPassword = document.getElementById('pwm-change-new').value.trim();
   const msg = document.getElementById('pwm-change-msg');
-  const r = await apiPost('/api/change-password', { oldPassword, newPassword });
+  const r = await apiPost('/api/change-password', {oldPassword, newPassword});
   if(r.ok) { msg.style.color='var(--accent)'; msg.textContent='✅ 密碼已更新'; }
   else { msg.style.color='var(--red)'; msg.textContent = r.error; }
   setTimeout(() => msg.textContent = '', 2500);
 }
 
-// Logout
 function doLogout() {
-  fetch('/api/logout', {method:'POST'}).then(() => { window.location.reload(); });
+  fetch('/api/logout', {method:'POST'}).then(() => window.location.reload());
 }
 
 // ========== INIT ==========
@@ -2068,26 +2147,20 @@ document.getElementById('today-date').textContent = new Date().toLocaleDateStrin
   try {
     const me = await fetch('/api/me');
     if(me.ok) {
-      const data = await me.json();
       await loadFromServer();
       document.getElementById('pw-overlay').style.display = 'none';
       renderDashboard();
     } else {
-      // Check if first-time setup
-      const regTest = await fetch('/api/register', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({})});
+      // Check if first-time (no users)
+      const regTest = await fetch('/api/register', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({})});
       const regData = await regTest.json();
-      if(regData.error === '系統已初始化，請聯繫管理員') {
-        document.getElementById('pw-overlay').style.display = 'flex';
-      } else {
-        // First time - show register option
-        document.getElementById('pw-overlay').style.display = 'flex';
+      if(regData.error !== '系統已初始化，請聯繫管理員') {
         document.getElementById('register-section').style.display = 'block';
         document.getElementById('login-subtitle').textContent = '首次使用，請建立管理員帳號';
       }
+      showLogin();
     }
-  } catch(e) {
-    document.getElementById('pw-overlay').style.display = 'flex';
-  }
+  } catch(e) { showLogin(); }
 })();
 </script>
 <!-- Bottom nav (mobile only) -->
