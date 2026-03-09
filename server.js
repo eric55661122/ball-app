@@ -43,12 +43,13 @@ async function initDB() {
   console.log('DB ready');
 }
 
+app.set('trust proxy', 1); // Trust Zeabur/nginx reverse proxy
 app.use(express.json({ limit: '10mb' }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 function auth(req, res, next) {
-  const token = req.cookies.token || (req.headers.authorization || '').replace('Bearer ', '');
+  const token = (req.headers.authorization || '').replace('Bearer ', '');
   if (!token) return res.status(401).json({ error: 'Unauthorized' });
   try { req.user = jwt.verify(token, JWT_SECRET); next(); }
   catch { res.clearCookie('token'); res.status(401).json({ error: 'Token expired' }); }
@@ -72,8 +73,8 @@ app.post('/api/login', async (req, res) => {
   if (!user || !bcrypt.compareSync(password, user.password))
     return res.status(401).json({ error: '帳號或密碼錯誤' });
   const token = jwt.sign({ id: user.id, username: user.username }, JWT_SECRET, { expiresIn: '30d' });
-  res.cookie('token', token, { httpOnly: true, maxAge: 30*24*60*60*1000, sameSite: 'lax' });
-  res.json({ ok: true, username: user.username });
+  // Return token in response body - frontend stores in localStorage
+  res.json({ ok: true, username: user.username, token });
 });
 
 app.post('/api/logout', (req, res) => { res.clearCookie('token'); res.json({ ok: true }); });

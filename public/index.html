@@ -1982,27 +1982,33 @@ function printStatement() {
 }
 
 // ========== API HELPERS ==========
+function getToken() { return localStorage.getItem('ball_token') || ''; }
+function authHeaders() {
+  return { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() };
+}
+
 let _saveTimer = null;
 function _apiSave() {
   clearTimeout(_saveTimer);
   _saveTimer = setTimeout(async () => {
-    try { await fetch('/api/data', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({data:DB})}); }
-    catch(e) { console.warn('Auto-save failed', e); }
+    try {
+      await fetch('/api/data', {method:'POST', headers: authHeaders(), body:JSON.stringify({data:DB})});
+    } catch(e) { console.warn('Auto-save failed', e); }
   }, 800);
 }
 
 async function apiGet(url) {
-  const r = await fetch(url);
+  const r = await fetch(url, { headers: authHeaders() });
   if(r.status === 401) { showLogin(); throw new Error('Unauthorized'); }
   return r.json();
 }
 async function apiPost(url, body) {
-  const r = await fetch(url, {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  const r = await fetch(url, {method:'POST', headers: authHeaders(), body:JSON.stringify(body)});
   if(r.status === 401) { showLogin(); throw new Error('Unauthorized'); }
   return r.json();
 }
 async function apiDelete(url) {
-  const r = await fetch(url, {method:'DELETE'});
+  const r = await fetch(url, {method:'DELETE', headers: authHeaders()});
   return r.json();
 }
 
@@ -2019,6 +2025,7 @@ async function doLogin() {
     const r = await fetch('/api/login', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username,password})});
     const d = await r.json();
     if(d.ok) {
+      localStorage.setItem('ball_token', d.token);
       document.getElementById('pw-overlay').style.display = 'none';
       await loadFromServer();
       renderDashboard();
@@ -2137,7 +2144,8 @@ async function changeSystemPw() {
 }
 
 function doLogout() {
-  fetch('/api/logout', {method:'POST'}).then(() => window.location.reload());
+  localStorage.removeItem('ball_token');
+  window.location.reload();
 }
 
 // ========== INIT ==========
@@ -2145,7 +2153,7 @@ document.getElementById('today-date').textContent = new Date().toLocaleDateStrin
 
 (async () => {
   try {
-    const me = await fetch('/api/me');
+    const me = await fetch('/api/me', { headers: authHeaders() });
     if(me.ok) {
       await loadFromServer();
       document.getElementById('pw-overlay').style.display = 'none';
