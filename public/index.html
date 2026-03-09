@@ -2007,7 +2007,7 @@ async function doLogin() {
       localStorage.setItem('ball_token', d.token);
       document.getElementById('pw-overlay').style.display = 'none';
       await loadFromServer();
-      renderDashboard();
+      renderDashboard(); renderAccounts(); renderContacts(); renderRecords();
       toast('✅ 歡迎，' + d.username);
     } else {
       errEl.textContent = d.error || '登入失敗';
@@ -2030,7 +2030,7 @@ async function doRegister() {
 
 async function loadFromServer() {
   try {
-    const r = await fetch('/api/data');
+    const r = await fetch('/api/data', { headers: authHeaders() });
     if(r.status === 401) { showLogin(); return; }
     const data = await r.json();
     if(data.data) {
@@ -2136,7 +2136,7 @@ document.getElementById('today-date').textContent = new Date().toLocaleDateStrin
     if(me.ok) {
       await loadFromServer();
       document.getElementById('pw-overlay').style.display = 'none';
-      renderDashboard();
+      renderDashboard(); renderAccounts(); renderContacts(); renderRecords();
     } else {
       // Check if first-time (no users) - use a dedicated check endpoint
       try {
