@@ -466,16 +466,36 @@ function prevRec(){
   if(cat==='539'&&!rec.amount){pv.style.display='none';return;}
   if(cat!=='539'&&!rec.result){pv.style.display='none';return;}
   pv.style.display='block';const c=calc(a,rec);
-  let h=`<div class="card-title">即時預覽</div>`;
-  if(cat==='539'){h+=`<div style="font-size:14px;font-weight:700;">交收：<span class="mono" style="color:${c.myNet>=0?'var(--accent)':'var(--red)'}">${fm(c.myNet)}</span></div>`;}
-  else{
-    h+=`<div class="tsm mb8">${cat==='ball'?`輸贏 ${fm(rec.result)} ｜ 水錢 ${fm(rec.waterAmount)}`:`輸贏 ${fm(rec.result)} ｜ 流水 ${fa(rec.turnover)}`}</div>`;
-    if(c.upper){const ua=Math.round(-c.upper.amount);h+=`<div style="padding:2px 0;font-size:13px;"><span class="blue">▲ ${c.upper.name}</span> (${c.upper.pct}%)：<span class="mono" style="font-weight:700;color:${ua>=0?'var(--accent)':'var(--red)'}">${fm(ua)}</span> ${cat==='ball'?'<span class="tsm">(只算輸贏)</span>':''}</div>`;}
-    c.shares.forEach(s=>{const sa=Math.round(-s.amount);h+=`<div style="padding:2px 0;font-size:13px;"><span class="green">▼ ${s.name}</span> (${s.pct}%)：<span class="mono" style="font-weight:700;color:${sa>=0?'var(--accent)':'var(--red)'}">${fm(sa)}</span></div>`;});
-    h+=`<hr class="divider"><div style="font-size:14px;font-weight:700;">👤 我 (${a.myPct||0}%)：<span class="mono" style="color:${c.myNet>=0?'var(--accent)':'var(--red)'}">${fm(Math.round(c.myNet))}</span></div>`;
+  // Display from 我 perspective: + = 我付, - = 我收
+  // For upper: -upper.amount = what I receive (positive=收). Flip sign: show as negative=我收
+  // For shares: -share.amount = what I pay them (positive=付). Show as positive=我付
+  let h=`<div class="card-title">即時預覽 <span class="tsm">（+我付 / -我收）</span></div>`;
+  if(cat==='539'){
+    const dir=c.myNet>=0?'我收':'我付';
+    h+=`<div style="font-size:14px;font-weight:700;">交收：<span class="mono" style="color:${c.myNet>=0?'var(--accent)':'var(--red)'}">${fm(c.myNet)}</span> <span class="tsm">${dir}</span></div>`;
+  }else{
+    h+=`<div class="tsm mb8">${cat==='ball'?`輸贏 ${fm(rec.result)} ｜ 水錢 ${fm(rec.waterAmount||0)}`:`輸贏 ${fm(rec.result)} ｜ 流水 ${fa(rec.turnover||0)}`}</div>`;
+    if(c.upper){
+      // upper pays me when client loses → I receive → show as negative (我收)
+      const myView=Math.round(c.upper.amount); // amount is (result+water)*pct, negative when client loses = upper pays me. So from 我 view: positive=我付, negative=我收
+      const label=myView>0?'我付':'我收';
+      h+=`<div style="padding:3px 0;font-size:13px;display:flex;justify-content:space-between;align-items:center;"><span><span class="blue">▲ ${c.upper.name}</span> <span class="tsm">(${c.upper.pct}%)</span></span><span><span class="mono" style="font-weight:700;color:${myView>0?'var(--red)':'var(--accent)'};">${fm(myView)}</span> <span style="font-size:11px;color:${myView>0?'var(--red)':'var(--accent)'};">${label}</span></span></div>`;
+    }
+    c.shares.forEach(s=>{
+      // share amount is (result+water)*pct, negative when client loses = I pay them → from 我 view: show as positive (我付)
+      const myView=Math.round(-(-s.amount)); // s.amount is negative when client loses, -s.amount is positive = I pay them. From 我 view: positive=我付
+      const actual=Math.round(-s.amount); // positive = I pay
+      const label=actual>0?'我付':'我收';
+      h+=`<div style="padding:3px 0;font-size:13px;display:flex;justify-content:space-between;align-items:center;"><span><span class="green">▼ ${s.name}</span> <span class="tsm">(${s.pct}%)</span></span><span><span class="mono" style="font-weight:700;color:${actual>0?'var(--red)':'var(--accent)'};">${actual>0?'+':'-'}${fa(actual)}</span> <span style="font-size:11px;color:${actual>0?'var(--red)':'var(--accent)'};">${label}</span></span></div>`;
+    });
+    const myNet=Math.round(c.myNet);
+    h+=`<hr class="divider"><div style="font-size:14px;font-weight:700;display:flex;justify-content:space-between;">
+      <span>👤 我 (${a.myPct||0}%)</span>
+      <span class="mono" style="color:${myNet>=0?'var(--accent)':'var(--red)'}">${myNet>=0?'-':'+'}${fa(myNet)} ${myNet>=0?'我收':'我付'}</span></div>`;
     if(cat==='ball'&&rec.waterAmount>0)h+=`<div class="tsm" style="color:var(--yel);">水錢退在我身上：${fm(rec.waterAmount)}</div>`;
+    // Verify
     const uA=c.upper?Math.round(-c.upper.amount):0,sA=Math.round(c.shares.reduce((s,x)=>s+(-x.amount),0)),mA=Math.round(c.myNet);
-    h+=`<div class="vr ${Math.abs(uA-(sA+mA))<2?'vok':'ver'}" style="font-size:11px;">${Math.abs(uA-(sA+mA))<2?'✅':'⚠️'} 上家${fm(uA)} = 股東${fm(sA)} + 我${fm(mA)}</div>`;
+    h+=`<div class="vr ${Math.abs(uA-(sA+mA))<2?'vok':'ver'}" style="font-size:11px;">${Math.abs(uA-(sA+mA))<2?'✅':'⚠️'} 上家交收${fa(uA)} = 股東${fa(sA)} + 我${fa(mA)}</div>`;
   }
   pv.innerHTML=h;
 }
@@ -497,9 +517,9 @@ function renderRecords(){
   let tN=0;
   const rows=rs.map(r=>{const a=DB.accounts.find(x=>x.id===r.accountId);const cat=a?a.category||'ball':'ball';const n=Math.round(calcNet(r));tN+=n;
     const info=cat==='539'?fm(r.amount||0):cat==='ball'?`${fm(r.result||0)} <span class="tsm">水${fm(r.waterAmount||0)}</span>`:`${fm(r.result||0)} <span class="tsm">流水${fa(r.turnover||0)}</span>`;
-    return `<tr><td>${ct(cat)}</td><td style="font-weight:600;">${a?a.name:'?'}</td><td>${info}</td><td class="mono" style="font-weight:700;color:${n>=0?'var(--accent)':'var(--red)'}">${fm(n)}</td><td class="tsm">${r.note||''}</td><td><div class="btn-row"><button class="btn btn-g btn-xs" onclick="openRecModal('${r.id}')">編輯</button><button class="btn btn-d btn-xs" onclick="delRec('${r.id}')">刪除</button></div></td></tr>`;
+    return `<tr><td>${ct(cat)}</td><td style="font-weight:600;">${a?a.name:'?'}</td><td>${info}</td><td class="mono" style="font-weight:700;color:${n>=0?'var(--accent)':'var(--red)'}"><span style="font-size:11px;">${n>=0?'我收':'我付'}</span> ${fa(n)}</td><td class="tsm">${r.note||''}</td><td><div class="btn-row"><button class="btn btn-g btn-xs" onclick="openRecModal('${r.id}')">編輯</button><button class="btn btn-d btn-xs" onclick="delRec('${r.id}')">刪除</button></div></td></tr>`;
   }).join('');
-  el.innerHTML=`<div class="card"><div class="table-wrap"><table><thead><tr><th>分類</th><th>帳號</th><th>金額</th><th>我的淨收</th><th>備註</th><th></th></tr></thead><tbody>${rows}<tr style="border-top:2px solid var(--accent);font-weight:700;"><td colspan="3">合計</td><td class="mono" style="color:${tN>=0?'var(--accent)':'var(--red)'}">${fm(tN)}</td><td colspan="2"></td></tr></tbody></table></div></div>`;
+  el.innerHTML=`<div class="card"><div class="table-wrap"><table><thead><tr><th>分類</th><th>帳號</th><th>金額</th><th>我的損益</th><th>備註</th><th></th></tr></thead><tbody>${rows}<tr style="border-top:2px solid var(--accent);font-weight:700;"><td colspan="3">合計</td><td class="mono" style="color:${tN>=0?'var(--accent)':'var(--red)'}"><span style="font-size:11px;">${tN>=0?'我收':'我付'}</span> ${fa(tN)}</td><td colspan="2"></td></tr></tbody></table></div></div>`;
 }
 
 // ═══ SETTLEMENT ═══
@@ -517,8 +537,8 @@ function renderSettle(){
   let h=`<div class="sgrid mb16"><div class="sbox"><div class="lb">我的淨收入</div><div class="vl" style="color:${tN>=0?'var(--accent)':'var(--red)'}">${fm(Math.round(tN))}</div></div><div class="sbox"><div class="lb">應收</div><div class="vl green">${fa(Object.values(pm).reduce((s,p)=>s+p.recv,0))}</div></div><div class="sbox"><div class="lb">應付</div><div class="vl red">${fa(Object.values(pm).reduce((s,p)=>s+p.pay,0))}</div></div></div>`;
   if(t5!==0)h+=`<div class="settle-card" style="border-color:var(--pur);"><div class="fb"><b>🔢 539 合計</b><span class="mono" style="font-weight:700;color:${t5>=0?'var(--accent)':'var(--red)'}">${fm(Math.round(t5))}</span></div></div>`;
   Object.entries(pm).forEach(([n,d])=>{const net=d.recv-d.pay;
-    h+=`<div class="settle-card"><div class="fb"><b>${n}</b><span class="mono" style="font-weight:700;color:${net>=0?'var(--accent)':'var(--red)'}">${net>=0?'應收':'應付'} ${fa(net)}</span></div>
-    <div class="table-wrap mt8"><table style="font-size:12px;"><thead><tr><th>帳號</th><th>輸贏</th><th>交收</th></tr></thead><tbody>${d.ds.map(x=>`<tr><td>${ct(x.cat)} ${x.acc}</td><td class="mono" style="color:${x.res>=0?'var(--accent)':'var(--red)'}">${fm(x.res)}</td><td class="mono" style="font-weight:600;color:${x.amt>=0?'var(--accent)':'var(--red)'}">${fm(x.amt)}</td></tr>`).join('')}</tbody></table></div></div>`;
+    h+=`<div class="settle-card"><div class="fb"><b>${n}</b><span class="mono" style="font-weight:700;color:${net>=0?'var(--accent)':'var(--red)'}">${net>=0?'我收':'我付'} ${fa(net)}</span></div>
+    <div class="table-wrap mt8"><table style="font-size:12px;"><thead><tr><th>帳號</th><th>輸贏</th><th>交收</th><th>方向</th></tr></thead><tbody>${d.ds.map(x=>`<tr><td>${ct(x.cat)} ${x.acc}</td><td class="mono" style="color:${x.res>=0?'var(--accent)':'var(--red)'}">${fm(x.res)}</td><td class="mono" style="font-weight:600;color:${x.amt>=0?'var(--accent)':'var(--red)'}">${fm(x.amt)}</td><td style="font-size:11px;font-weight:600;color:${x.amt>=0?'var(--accent)':'var(--red)'}">${x.amt>=0?'我收':'我付'}</td></tr>`).join('')}</tbody></table></div></div>`;
   });
   el.innerHTML=h;
 }
