@@ -233,7 +233,7 @@ tbody tr{border-bottom:1px solid var(--border);transition:background .1s}tbody t
       <div id="acc-upper-section">
         <div style="font-size:12px;font-weight:700;color:var(--accent2);margin-bottom:8px;">▲ 上家設定</div>
         <div class="form-grid form-grid-3 mb-16" id="acc-upper-fields">
-          <div class="form-group"><label>上家名稱</label><input id="acc-upper-name" placeholder="上家名稱"></div>
+          <div class="form-group"><label>上家名稱</label><select id="acc-upper-name" style="cursor:pointer;-webkit-appearance:menulist;appearance:menulist;"></select></div>
           <div class="form-group"><label>交收比例 %</label><input id="acc-upper-pct" type="number" placeholder="50" min="0" max="100" oninput="checkAccPct()"></div>
           <div class="form-group" id="acc-upper-water-group"><label id="acc-upper-water-label">退水數（0=不退）</label><input id="acc-upper-water" type="number" placeholder="115" min="0"></div>
         </div>
@@ -385,7 +385,11 @@ function openAccountModal(id){
   document.getElementById('acc-name').value=acc?acc.name:'';
   document.getElementById('acc-category').value=acc?acc.category||'ball':'ball';
   document.getElementById('acc-role').value=acc?acc.role:'middle';
-  document.getElementById('acc-upper-name').value=acc&&acc.upper?acc.upper.name:'';
+  document.getElementById('acc-upper-name').innerHTML=contactOptions(acc&&acc.upper?acc.upper.name:'');
+  // If upper name is custom (not in contacts), prepend it
+  if(acc&&acc.upper&&acc.upper.name&&!DB.contacts.find(c=>c.name===acc.upper.name)){const sel=document.getElementById('acc-upper-name');sel.innerHTML=`<option value="${acc.upper.name}" selected>${acc.upper.name} (自訂)</option>`+sel.innerHTML;}
+  document.getElementById('acc-upper-name').onchange=function(){if(this.value==='__custom__'){const name=prompt('輸入上家名稱：');if(name&&name.trim()){const opt=document.createElement('option');opt.value=name.trim();opt.textContent=name.trim()+' (自訂)';this.insertBefore(opt,this.firstChild);this.value=name.trim();}else this.value='';}};
+
   document.getElementById('acc-upper-pct').value=acc&&acc.upper?acc.upper.pct:'';
   document.getElementById('acc-upper-water').value=acc&&acc.upper?acc.upper.water:'';
   document.getElementById('acc-backend-pct').value=acc?(acc.backendPct!=null?acc.backendPct:5.5):5.5;
@@ -407,12 +411,19 @@ function onAccCategoryChange(){
   }
 }
 function onAccRoleChange(){document.getElementById('acc-upper-section').style.display=document.getElementById('acc-role').value==='middle'?'block':'none';checkAccPct();}
+function contactOptions(selected){return `<option value="">-- 選擇聯絡人 --</option>`+DB.contacts.map(c=>`<option value="${c.name}"${c.name===selected?' selected':''}>${c.name}</option>`).join('')+`<option value="__custom__">✏️ 手動輸入...</option>`;}
 function addAccShare(){_accShares.push({name:'',pct:0,water:0});renderAccShares();}
 function removeAccShare(i){_accShares.splice(i,1);renderAccShares();checkAccPct();}
 function renderAccShares(){
   const cat=document.getElementById('acc-category').value;
   const waterLabel=cat==='ball'?'水數':'水數';
-  document.getElementById('acc-shares').innerHTML=_accShares.map((s,i)=>`<div class="share-row"><input placeholder="名稱" value="${s.name}" onchange="_accShares[${i}].name=this.value" style="text-align:left;"><input type="number" placeholder="佔%" value="${s.pct||''}" min="0" max="100" onchange="_accShares[${i}].pct=parseFloat(this.value)||0;checkAccPct()" style="font-family:'JetBrains Mono',monospace;"><input type="number" placeholder="${waterLabel}" value="${s.water||''}" min="0" onchange="_accShares[${i}].water=parseFloat(this.value)||0" style="font-family:'JetBrains Mono',monospace;"><button class="icon-btn" onclick="removeAccShare(${i})">✕</button></div>`).join('');
+  document.getElementById('acc-shares').innerHTML=_accShares.map((s,i)=>`<div class="share-row"><select onchange="onShareNameChange(${i},this)" style="text-align:left;cursor:pointer;-webkit-appearance:menulist;appearance:menulist;">${contactOptions(s.name)}</select><input type="number" placeholder="佔%" value="${s.pct||''}" min="0" max="100" onchange="_accShares[${i}].pct=parseFloat(this.value)||0;checkAccPct()" style="font-family:'JetBrains Mono',monospace;"><input type="number" placeholder="${waterLabel}" value="${s.water||''}" min="0" onchange="_accShares[${i}].water=parseFloat(this.value)||0" style="font-family:'JetBrains Mono',monospace;"><button class="icon-btn" onclick="removeAccShare(${i})">✕</button></div>`).join('');
+  // If any share has a custom name not in contacts, show it
+  _accShares.forEach((s,i)=>{if(s.name&&!DB.contacts.find(c=>c.name===s.name)){const sel=document.getElementById('acc-shares').querySelectorAll('.share-row')[i]?.querySelector('select');if(sel){sel.innerHTML=`<option value="${s.name}" selected>${s.name} (自訂)</option>`+sel.innerHTML;}}});
+}
+function onShareNameChange(i,sel){
+  if(sel.value==='__custom__'){const name=prompt('輸入名稱：');if(name&&name.trim()){_accShares[i].name=name.trim();renderAccShares();}else{sel.value=_accShares[i].name;}}
+  else{_accShares[i].name=sel.value;}
 }
 function checkAccPct(){
   const cat=document.getElementById('acc-category').value;
@@ -429,7 +440,7 @@ function saveAccount(){
   const cat=document.getElementById('acc-category').value;
   const role=document.getElementById('acc-role').value;
   const acc={id:_editAccountId||uid(),name,category:cat,role,
-    upper:(cat!=='539'&&role==='middle')?{name:document.getElementById('acc-upper-name').value.trim(),pct:parseFloat(document.getElementById('acc-upper-pct').value)||0,water:parseFloat(document.getElementById('acc-upper-water').value)||0}:null,
+    upper:(cat!=='539'&&role==='middle')?{name:document.getElementById('acc-upper-name').value,pct:parseFloat(document.getElementById('acc-upper-pct').value)||0,water:parseFloat(document.getElementById('acc-upper-water').value)||0}:null,
     shares:cat!=='539'?_accShares.filter(s=>s.name.trim()):[],
     backendPct:cat==='bac'?(parseFloat(document.getElementById('acc-backend-pct').value)||0):0,
     baseWater:cat==='bac'?(parseFloat(document.getElementById('acc-base-water').value)||100):0};
