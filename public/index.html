@@ -2,302 +2,159 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>球帳管理系統</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=Space+Mono:wght@400;700&display=swap');
+:root {
+  --bg: #08090d;
+  --surface: #0f1117;
+  --surface2: #161a24;
+  --surface3: #1c2130;
+  --border: #252d3f;
+  --accent: #34d399;
+  --accent-dim: rgba(52,211,153,.1);
+  --accent2: #38bdf8;
+  --red: #f87171;
+  --red-dim: rgba(248,113,113,.1);
+  --yellow: #fbbf24;
+  --yellow-dim: rgba(251,191,36,.1);
+  --blue-dim: rgba(56,189,248,.1);
+  --text: #e4e8f0;
+  --text2: #8c95a8;
+  --text3: #5a6478;
+  --radius: 10px;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); color:var(--text); font-family:'Noto Sans TC',sans-serif; min-height:100vh; overflow-x:hidden; }
+::-webkit-scrollbar { width:4px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--border); border-radius:4px; }
 
-  :root {
-    --bg: #0a0c10;
-    --surface: #111318;
-    --surface2: #181c24;
-    --surface3: #1e2430;
-    --border: #2a3044;
-    --accent: #4ade80;
-    --accent2: #22d3ee;
-    --red: #f87171;
-    --yellow: #fbbf24;
-    --text: #e2e8f0;
-    --text2: #94a3b8;
-    --text3: #64748b;
-  }
-
-  * { margin:0; padding:0; box-sizing:border-box; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Noto Sans TC', sans-serif;
-    min-height: 100vh;
-    overflow-x: hidden;
-  }
-
-  /* Sidebar */
-  .sidebar {
-    position: fixed; left:0; top:0; width:220px; height:100vh;
-    background: var(--surface);
-    border-right: 1px solid var(--border);
-    display: flex; flex-direction: column;
-    z-index: 100;
-  }
-  .logo {
-    padding: 24px 20px;
-    border-bottom: 1px solid var(--border);
-    font-family: 'Space Mono', monospace;
-    font-size: 14px; font-weight: 700;
-    color: var(--accent);
-    letter-spacing: 1px;
-  }
-  .logo span { color: var(--text2); font-weight:400; font-size:11px; display:block; margin-top:2px; }
-  .nav { flex:1; padding:12px 0; }
-  .nav-item {
-    display:flex; align-items:center; gap:10px;
-    padding: 11px 20px; cursor:pointer;
-    font-size:13px; color: var(--text2);
-    transition: all .2s; border-left: 2px solid transparent;
-  }
-  .nav-item:hover { color: var(--text); background: var(--surface2); }
-  .nav-item.active { color: var(--accent); background: rgba(74,222,128,.07); border-left-color: var(--accent); }
-  .nav-icon { font-size:16px; }
-
-  /* Main */
-  .main { margin-left:220px; padding:28px; min-height:100vh; }
-
-  .page { display:none; }
-  .page.active { display:block; }
-
-  /* Header */
-  .page-header { margin-bottom:24px; }
-  .page-title { font-size:22px; font-weight:700; color:var(--text); }
-  .page-sub { font-size:13px; color:var(--text3); margin-top:4px; }
-
-  /* Cards */
-  .card {
-    background: var(--surface); border:1px solid var(--border);
-    border-radius:10px; padding:20px;
-  }
-  .card-title { font-size:13px; font-weight:600; color:var(--text2); margin-bottom:16px; text-transform:uppercase; letter-spacing:.5px; }
-
-  /* Stats row */
-  .stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:20px; }
-  .stat-card {
-    background: var(--surface); border:1px solid var(--border);
-    border-radius:10px; padding:18px 20px;
-  }
-  .stat-label { font-size:11px; color:var(--text3); text-transform:uppercase; letter-spacing:.5px; }
-  .stat-val { font-size:26px; font-weight:700; font-family:'Space Mono',monospace; margin-top:6px; }
-  .stat-val.green { color:var(--accent); }
-  .stat-val.red { color:var(--red); }
-  .stat-val.blue { color:var(--accent2); }
-  .stat-val.yellow { color:var(--yellow); }
-
-  /* Table */
-  .table-wrap { overflow-x:auto; }
-  table { width:100%; border-collapse:collapse; font-size:13px; }
-  thead th {
-    text-align:left; padding:10px 14px;
-    background: var(--surface2); color:var(--text3);
-    font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:.5px;
-    border-bottom:1px solid var(--border);
-  }
-  tbody tr { border-bottom:1px solid var(--border); }
-  tbody tr:hover { background: var(--surface2); }
-  tbody td { padding:11px 14px; color:var(--text); }
-  .badge {
-    display:inline-block; padding:2px 8px; border-radius:4px;
-    font-size:11px; font-weight:600;
-  }
-  .badge-green { background:rgba(74,222,128,.15); color:var(--accent); }
-  .badge-red { background:rgba(248,113,113,.15); color:var(--red); }
-  .badge-blue { background:rgba(34,211,238,.15); color:var(--accent2); }
-  .badge-yellow { background:rgba(251,191,36,.15); color:var(--yellow); }
-
-  /* Buttons */
-  .btn {
-    padding:9px 18px; border-radius:7px; border:none; cursor:pointer;
-    font-size:13px; font-weight:600; transition:all .2s;
-    font-family:'Noto Sans TC',sans-serif;
-  }
-  .btn-primary { background:var(--accent); color:#0a0c10; }
-  .btn-primary:hover { background:#22c55e; }
-  .btn-ghost { background:var(--surface2); color:var(--text); border:1px solid var(--border); }
-  .btn-ghost:hover { background:var(--surface3); }
-  .btn-danger { background:rgba(248,113,113,.15); color:var(--red); border:1px solid rgba(248,113,113,.3); }
-  .btn-danger:hover { background:rgba(248,113,113,.25); }
-  .btn-sm { padding:5px 12px; font-size:12px; }
-
-  /* Forms */
-  .form-grid { display:grid; gap:14px; }
-  .form-grid-2 { grid-template-columns:1fr 1fr; }
-  .form-grid-3 { grid-template-columns:1fr 1fr 1fr; }
-  .form-group label { display:block; font-size:12px; color:var(--text2); margin-bottom:6px; font-weight:500; }
-  .form-group input, .form-group select, .form-group textarea {
-    width:100%; background:var(--surface2); border:1px solid var(--border);
-    color:var(--text); border-radius:7px; padding:9px 12px; font-size:13px;
-    font-family:'Noto Sans TC',sans-serif; transition:border .2s;
-    outline:none;
-  }
-  .form-group input:focus, .form-group select:focus {
-    border-color:var(--accent);
-  }
-  .form-group select option { background: #1e2430; }
-
-  /* Modal */
-  .overlay {
-    display:none; position:fixed; inset:0;
-    background:rgba(0,0,0,.7); z-index:200;
-    align-items:center; justify-content:center;
-  }
-  .overlay.open { display:flex; }
-  .modal {
-    background:var(--surface); border:1px solid var(--border);
-    border-radius:14px; padding:28px; width:90%; max-width:580px;
-    max-height:85vh; overflow-y:auto;
-  }
-  .modal-title { font-size:16px; font-weight:700; margin-bottom:20px; }
-  .modal-actions { display:flex; gap:10px; justify-content:flex-end; margin-top:20px; }
-
-  /* Section tabs */
-  .tabs { display:flex; gap:4px; margin-bottom:18px; }
-  .tab {
-    padding:8px 16px; border-radius:7px; cursor:pointer;
-    font-size:13px; color:var(--text2); transition:all .2s;
-  }
-  .tab:hover { background:var(--surface2); }
-  .tab.active { background:rgba(74,222,128,.12); color:var(--accent); font-weight:600; }
-
-  /* Share list in modal */
-  .share-list { display:flex; flex-direction:column; gap:8px; margin:10px 0; }
-  .share-row {
-    display:grid; grid-template-columns:1fr 100px 80px 36px;
-    gap:8px; align-items:center;
-  }
-  .share-row input { text-align:center; }
-
-  /* Settlement */
-  .settle-card {
-    border:1px solid var(--border); border-radius:8px;
-    padding:14px 16px; margin-bottom:10px;
-  }
-  .settle-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
-  .settle-name { font-weight:600; font-size:14px; }
-  .settle-rows { display:flex; flex-direction:column; gap:4px; }
-  .settle-row { display:flex; justify-content:space-between; font-size:12px; color:var(--text2); }
-  .settle-total { display:flex; justify-content:space-between; margin-top:8px; padding-top:8px; border-top:1px solid var(--border); font-weight:700; font-size:14px; }
-
-  /* Notification */
-  .toast {
-    position:fixed; bottom:24px; right:24px; z-index:999;
-    background:var(--surface2); border:1px solid var(--accent);
-    border-radius:8px; padding:12px 20px; font-size:13px; color:var(--accent);
-    transform:translateY(60px); opacity:0; transition:all .3s;
-  }
-  .toast.show { transform:translateY(0); opacity:1; }
-
-  .actions-row { display:flex; gap:10px; margin-bottom:18px; }
-  .flex-between { display:flex; justify-content:space-between; align-items:center; }
-  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
-  .mt-16 { margin-top:16px; }
-  .mt-8 { margin-top:8px; }
-  .text-right { text-align:right; }
-  .text-green { color:var(--accent); }
-  .text-red { color:var(--red); }
-  .text-yellow { color:var(--yellow); }
-  .text-blue { color:var(--accent2); }
-  .text-sm { font-size:12px; color:var(--text3); }
-  .divider { border:none; border-top:1px solid var(--border); margin:16px 0; }
-  .mono { font-family:'Space Mono',monospace; }
-  .icon-btn {
-    width:30px; height:30px; border-radius:6px; border:1px solid var(--border);
-    background:var(--surface2); cursor:pointer; display:flex; align-items:center;
-    justify-content:center; font-size:14px; transition:all .2s; color:var(--text2);
-  }
-  .icon-btn:hover { background:var(--surface3); color:var(--text); }
-
-  /* Summary boxes */
-  .summary-box { background:var(--surface2); border-radius:8px; padding:14px; }
-  .summary-box .label { font-size:11px; color:var(--text3); margin-bottom:4px; text-transform:uppercase; }
-  .summary-box .value { font-size:18px; font-weight:700; font-family:'Space Mono',monospace; }
-
-  /* Report */
-  .report-section { margin-bottom:24px; }
-  .report-section-title { font-size:13px; font-weight:700; color:var(--text2); margin-bottom:12px; text-transform:uppercase; letter-spacing:.5px; border-left:3px solid var(--accent); padding-left:10px; }
-
-  /* Scrollbar */
-  ::-webkit-scrollbar { width:4px; }
-  ::-webkit-scrollbar-track { background:transparent; }
-  ::-webkit-scrollbar-thumb { background:var(--border); border-radius:4px; }
-
-  @media (max-width:768px) {
-    .sidebar { display:none; }
-    .main { margin-left:0; padding:12px 10px 80px 10px; }
-    .stats-row { grid-template-columns:1fr 1fr; }
-    .share-row { grid-template-columns:1fr 60px 60px 60px 28px; gap:4px; }
-    .form-grid-2 { grid-template-columns:1fr; }
-    .form-grid-3 { grid-template-columns:1fr; }
-    .modal { width:96vw; max-height:90vh; overflow-y:auto; padding:16px; }
-    .page-title { font-size:18px; }
-    .card { padding:14px; }
-    table { font-size:12px; }
-    th, td { padding:6px 4px; }
-    .bottom-nav { display:flex; }
-  }
-  @media (min-width:769px) {
-    .bottom-nav { display:none; }
-  }
-
-  /* Bottom nav for mobile */
-  .bottom-nav {
-    position:fixed; bottom:0; left:0; right:0; z-index:200;
-    background:var(--surface); border-top:1px solid var(--border);
-    justify-content:space-around; align-items:center;
-    padding:6px 0 env(safe-area-inset-bottom, 6px) 0;
-    backdrop-filter:blur(10px);
-  }
-  .bottom-nav-item {
-    display:flex; flex-direction:column; align-items:center; gap:2px;
-    padding:6px 8px; border-radius:8px; cursor:pointer;
-    color:var(--text3); font-size:10px; min-width:44px;
-    transition:color .2s;
-  }
-  .bottom-nav-item.active { color:var(--accent); }
-  .bottom-nav-item .bn-icon { font-size:20px; line-height:1; }
-
-  /* Password overlay */
-  .pw-overlay {
-    position:fixed; inset:0; z-index:999;
-    background:var(--bg);
-    display:flex; align-items:center; justify-content:center;
-  }
-  .pw-box {
-    background:var(--surface); border:1px solid var(--border);
-    border-radius:16px; padding:32px; width:90%; max-width:360px;
-    text-align:center;
-  }
-  .pw-box h2 { font-size:22px; margin-bottom:6px; }
-  .pw-box p { color:var(--text3); font-size:13px; margin-bottom:20px; }
-  .pw-input {
-    width:100%; background:var(--surface2); border:1px solid var(--border);
-    color:var(--text); border-radius:8px; padding:12px; font-size:16px;
-    text-align:center; letter-spacing:4px; outline:none; margin-bottom:14px;
-    box-sizing:border-box;
-  }
-  .pw-error { color:var(--red); font-size:13px; margin-bottom:10px; min-height:18px; }
+.sidebar { position:fixed; left:0; top:0; width:230px; height:100vh; background:var(--surface); border-right:1px solid var(--border); display:flex; flex-direction:column; z-index:100; }
+.logo { padding:22px 20px; border-bottom:1px solid var(--border); }
+.logo-text { font-family:'JetBrains Mono',monospace; font-size:15px; font-weight:700; color:var(--accent); letter-spacing:1px; }
+.logo-sub { color:var(--text3); font-size:11px; margin-top:2px; }
+.nav { flex:1; padding:10px 0; overflow-y:auto; }
+.nav-item { display:flex; align-items:center; gap:10px; padding:11px 20px; cursor:pointer; font-size:13px; color:var(--text2); transition:all .15s; border-left:2px solid transparent; }
+.nav-item:hover { color:var(--text); background:var(--surface2); }
+.nav-item.active { color:var(--accent); background:var(--accent-dim); border-left-color:var(--accent); font-weight:600; }
+.nav-icon { font-size:16px; width:22px; text-align:center; }
+.nav-bottom { padding:12px; border-top:1px solid var(--border); display:flex; flex-direction:column; gap:6px; }
+.main { margin-left:230px; padding:24px 28px; min-height:100vh; }
+.page { display:none; }
+.page.active { display:block; }
+.page-header { margin-bottom:22px; display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; }
+.page-title { font-size:20px; font-weight:700; }
+.page-sub { font-size:12px; color:var(--text3); margin-top:3px; }
+.card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:18px; }
+.card-title { font-size:11px; font-weight:700; color:var(--text3); margin-bottom:14px; text-transform:uppercase; letter-spacing:.8px; }
+.stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:18px; }
+.stat-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:16px 18px; }
+.stat-label { font-size:10px; color:var(--text3); text-transform:uppercase; letter-spacing:.5px; font-weight:600; }
+.stat-val { font-size:24px; font-weight:700; font-family:'JetBrains Mono',monospace; margin-top:5px; }
+.green { color:var(--accent); }
+.red { color:var(--red); }
+.blue { color:var(--accent2); }
+.yellow { color:var(--yellow); }
+.table-wrap { overflow-x:auto; }
+table { width:100%; border-collapse:collapse; font-size:13px; }
+thead th { text-align:left; padding:9px 12px; background:var(--surface2); color:var(--text3); font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:.5px; border-bottom:1px solid var(--border); white-space:nowrap; }
+tbody tr { border-bottom:1px solid var(--border); transition:background .1s; }
+tbody tr:hover { background:var(--surface2); }
+tbody td { padding:10px 12px; }
+.badge { display:inline-block; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:600; }
+.badge-green { background:var(--accent-dim); color:var(--accent); }
+.badge-red { background:var(--red-dim); color:var(--red); }
+.badge-blue { background:var(--blue-dim); color:var(--accent2); }
+.badge-yellow { background:var(--yellow-dim); color:var(--yellow); }
+.btn { padding:8px 16px; border-radius:7px; border:none; cursor:pointer; font-size:13px; font-weight:600; transition:all .15s; font-family:'Noto Sans TC',sans-serif; }
+.btn-primary { background:var(--accent); color:#0a0c10; }
+.btn-primary:hover { background:#22c55e; }
+.btn-ghost { background:var(--surface2); color:var(--text); border:1px solid var(--border); }
+.btn-ghost:hover { background:var(--surface3); }
+.btn-danger { background:var(--red-dim); color:var(--red); border:1px solid rgba(248,113,113,.2); }
+.btn-danger:hover { background:rgba(248,113,113,.2); }
+.btn-sm { padding:5px 12px; font-size:12px; }
+.btn-xs { padding:3px 8px; font-size:11px; }
+.btn-row { display:flex; gap:8px; flex-wrap:wrap; }
+.form-grid { display:grid; gap:12px; }
+.form-grid-2 { grid-template-columns:1fr 1fr; }
+.form-grid-3 { grid-template-columns:1fr 1fr 1fr; }
+.form-group label { display:block; font-size:12px; color:var(--text2); margin-bottom:5px; font-weight:500; }
+.form-group input, .form-group select, .form-group textarea {
+  width:100%; background:var(--surface2); border:1px solid var(--border); color:var(--text);
+  border-radius:7px; padding:8px 11px; font-size:13px; font-family:'Noto Sans TC',sans-serif; outline:none; transition:border .15s;
+}
+.form-group input:focus, .form-group select:focus { border-color:var(--accent); }
+.form-group select option { background:var(--surface2); }
+.form-group input[type=number] { font-family:'JetBrains Mono',monospace; }
+.overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.75); z-index:200; align-items:center; justify-content:center; }
+.overlay.open { display:flex; }
+.modal { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:24px; width:92%; max-width:640px; max-height:88vh; overflow-y:auto; }
+.modal-title { font-size:16px; font-weight:700; margin-bottom:18px; display:flex; align-items:center; gap:8px; }
+.modal-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:18px; }
+.toast { position:fixed; bottom:24px; right:24px; z-index:999; background:var(--surface2); border:1px solid var(--accent); border-radius:8px; padding:12px 20px; font-size:13px; color:var(--accent); transform:translateY(60px); opacity:0; transition:all .3s; }
+.toast.show { transform:translateY(0); opacity:1; }
+.mono { font-family:'JetBrains Mono',monospace; }
+.text-sm { font-size:12px; color:var(--text3); }
+.mt-8 { margin-top:8px; }
+.mt-12 { margin-top:12px; }
+.mb-12 { margin-bottom:12px; }
+.mb-16 { margin-bottom:16px; }
+.flex-between { display:flex; justify-content:space-between; align-items:center; }
+.grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.divider { border:none; border-top:1px solid var(--border); margin:14px 0; }
+.empty-state { text-align:center; color:var(--text3); padding:28px 0; font-size:13px; }
+.icon-btn { width:28px; height:28px; border-radius:6px; border:1px solid var(--border); background:var(--surface2); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:13px; transition:all .15s; color:var(--text2); }
+.icon-btn:hover { background:var(--surface3); color:var(--text); }
+.settle-card { border:1px solid var(--border); border-radius:8px; padding:14px; margin-bottom:10px; background:var(--surface); }
+.settle-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+.summary-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:12px; }
+.summary-box { background:var(--surface2); border-radius:8px; padding:12px; }
+.summary-box .label { font-size:10px; color:var(--text3); margin-bottom:3px; text-transform:uppercase; font-weight:600; }
+.summary-box .value { font-size:16px; font-weight:700; font-family:'JetBrains Mono',monospace; }
+.verify-row { display:flex; align-items:center; gap:8px; padding:8px 12px; border-radius:7px; font-size:13px; font-weight:600; margin-top:8px; }
+.verify-ok { background:var(--accent-dim); color:var(--accent); }
+.verify-err { background:var(--red-dim); color:var(--red); }
+.pw-overlay { position:fixed; inset:0; z-index:999; background:var(--bg); display:flex; align-items:center; justify-content:center; }
+.pw-box { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:32px; width:90%; max-width:360px; text-align:center; }
+.pw-box h2 { font-size:22px; margin-bottom:6px; }
+.pw-box p { color:var(--text3); font-size:13px; margin-bottom:20px; }
+.pw-input { width:100%; background:var(--surface2); border:1px solid var(--border); color:var(--text); border-radius:8px; padding:12px; font-size:16px; text-align:center; outline:none; margin-bottom:12px; box-sizing:border-box; }
+.pw-error { color:var(--red); font-size:13px; margin-bottom:10px; min-height:18px; }
+.share-row { display:grid; grid-template-columns:1fr 80px 80px 32px; gap:8px; align-items:center; margin-bottom:6px; }
+.share-row input { text-align:center; }
+.bottom-nav { position:fixed; bottom:0; left:0; right:0; z-index:200; background:var(--surface); border-top:1px solid var(--border); justify-content:space-around; align-items:center; padding:6px 0 env(safe-area-inset-bottom,6px) 0; display:none; }
+.bottom-nav-item { display:flex; flex-direction:column; align-items:center; gap:2px; padding:6px 6px; border-radius:8px; cursor:pointer; color:var(--text3); font-size:9px; min-width:44px; transition:color .15s; }
+.bottom-nav-item.active { color:var(--accent); }
+.bottom-nav-item .bn-icon { font-size:20px; line-height:1; }
+@media (max-width:768px) {
+  .sidebar { display:none; }
+  .main { margin-left:0; padding:12px 10px 80px 10px; }
+  .stats-row { grid-template-columns:1fr 1fr; }
+  .form-grid-2, .form-grid-3 { grid-template-columns:1fr; }
+  .grid-2 { grid-template-columns:1fr; }
+  .summary-grid { grid-template-columns:1fr 1fr; }
+  .modal { width:96vw; max-height:92vh; padding:16px; }
+  .page-title { font-size:17px; }
+  .share-row { grid-template-columns:1fr 60px 60px 28px; gap:4px; }
+  .bottom-nav { display:flex; }
+  table { font-size:12px; }
+  th, td { padding:6px 4px; }
+}
+@media (min-width:769px) { .bottom-nav { display:none; } }
 </style>
 </head>
 <body>
 
-<!-- Password Overlay -->
 <div class="pw-overlay" id="pw-overlay">
   <div class="pw-box">
     <div style="font-size:40px;margin-bottom:8px;">⚽</div>
     <h2>球帳管理系統</h2>
     <p id="login-subtitle">請登入以繼續</p>
-    <input class="pw-input" id="login-username" type="text" placeholder="帳號" maxlength="30"
-      style="letter-spacing:normal;margin-bottom:10px;"
-      onkeydown="if(event.key==='Enter') document.getElementById('login-password').focus()">
-    <input class="pw-input" id="login-password" type="password" placeholder="密碼" maxlength="30"
-      onkeydown="if(event.key==='Enter') doLogin()">
+    <input class="pw-input" id="login-username" type="text" placeholder="帳號" maxlength="30" style="letter-spacing:normal;" onkeydown="if(event.key==='Enter')document.getElementById('login-password').focus()">
+    <input class="pw-input" id="login-password" type="password" placeholder="密碼" maxlength="30" onkeydown="if(event.key==='Enter')doLogin()">
     <div class="pw-error" id="pw-error"></div>
     <button class="btn btn-primary" style="width:100%;padding:12px;margin-top:4px;" onclick="doLogin()">登入</button>
     <div id="register-section" style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);display:none;">
@@ -307,269 +164,143 @@
   </div>
 </div>
 
-<!-- Sidebar -->
 <div class="sidebar">
-  <div class="logo">⚽ 球帳<span>管理系統 v1.0</span></div>
+  <div class="logo"><div class="logo-text">⚽ 球帳系統</div><div class="logo-sub">管理 · 結算 · 對帳</div></div>
   <nav class="nav">
-    <div class="nav-item active" onclick="goPage('dashboard')">
-      <span class="nav-icon">📊</span><span>總覽</span>
-    </div>
-    <div class="nav-item" onclick="goPage('accounts')">
-      <span class="nav-icon">🏦</span><span>帳號管理</span>
-    </div>
-    <div class="nav-item" onclick="goPage('contacts')">
-      <span class="nav-icon">👥</span><span>聯絡人</span>
-    </div>
-    <div class="nav-item" onclick="goPage('records')">
-      <span class="nav-icon">📝</span><span>輸贏記錄</span>
-    </div>
-    <div class="nav-item" onclick="goPage('settlement')">
-      <span class="nav-icon">💰</span><span>結算總覽</span>
-    </div>
-    <div class="nav-item" onclick="goPage('report')">
-      <span class="nav-icon">📈</span><span>報表</span>
-    </div>
-    <div class="nav-item" onclick="goPage('statement')">
-      <span class="nav-icon">🧾</span><span>對帳明細</span>
-    </div>
-    <div class="nav-item" onclick="showPwManager()">
-      <span class="nav-icon">🔐</span><span>帳密管理</span>
-    </div>
+    <div class="nav-item active" onclick="goPage('dashboard')" data-nav="dashboard"><span class="nav-icon">📊</span>總覽</div>
+    <div class="nav-item" onclick="goPage('accounts')" data-nav="accounts"><span class="nav-icon">📋</span>帳號管理</div>
+    <div class="nav-item" onclick="goPage('contacts')" data-nav="contacts"><span class="nav-icon">👥</span>聯絡人</div>
+    <div class="nav-item" onclick="goPage('records')" data-nav="records"><span class="nav-icon">📝</span>輸贏記錄</div>
+    <div class="nav-item" onclick="goPage('settlement')" data-nav="settlement"><span class="nav-icon">💰</span>每週結算</div>
+    <div class="nav-item" onclick="goPage('monthly')" data-nav="monthly"><span class="nav-icon">📅</span>月結利潤</div>
+    <div class="nav-item" onclick="goPage('verify')" data-nav="verify"><span class="nav-icon">✅</span>對帳驗證</div>
+    <div class="nav-item" onclick="showPwManager()"><span class="nav-icon">🔐</span>帳密管理</div>
   </nav>
-  <div style="padding:10px 12px;border-top:1px solid var(--border);display:grid;grid-template-columns:1fr 1fr;gap:5px;">
-    <button class="btn btn-ghost btn-sm" style="font-size:11px;" onclick="exportData()">📤 備份</button>
-    <button class="btn btn-ghost btn-sm" style="font-size:11px;" onclick="document.getElementById('import-file').click()">📥 還原</button>
-    <button class="btn btn-ghost btn-sm" style="font-size:11px;grid-column:span 2;color:var(--red);margin-top:2px;" onclick="doLogout()">🚪 登出</button>
+  <div class="nav-bottom">
+    <button class="btn btn-ghost btn-sm" style="font-size:11px;width:100%;" onclick="exportData()">📤 匯出備份</button>
+    <button class="btn btn-ghost btn-sm" style="font-size:11px;width:100%;" onclick="document.getElementById('import-file').click()">📥 匯入備份</button>
+    <button class="btn btn-ghost btn-sm" style="font-size:11px;width:100%;color:var(--red);margin-top:4px;" onclick="doLogout()">🚪 登出</button>
   </div>
 </div>
 
-<!-- Main -->
 <div class="main">
 
-  <!-- DASHBOARD -->
-  <div class="page active" id="page-dashboard">
-    <div class="page-header">
-      <div class="page-title">總覽</div>
-      <div class="page-sub" id="today-date"></div>
-    </div>
-    <div class="stats-row">
-      <div class="stat-card">
-        <div class="stat-label">本月淨損益</div>
-        <div class="stat-val" id="dash-monthly" style="color:var(--accent)">+0</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">本週淨損益</div>
-        <div class="stat-val" id="dash-weekly" style="color:var(--accent2)">+0</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">應收合計</div>
-        <div class="stat-val green" id="dash-recv">0</div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-label">應付合計</div>
-        <div class="stat-val red" id="dash-pay">0</div>
-      </div>
-    </div>
-    <div class="grid-2">
-      <div class="card">
-        <div class="card-title">最近記錄</div>
-        <div id="dash-recent-records">
-          <div class="text-sm" style="padding:20px 0;text-align:center;">尚無記錄</div>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-title">待結算彙總</div>
-        <div id="dash-pending"></div>
-      </div>
-    </div>
+<div class="page active" id="page-dashboard">
+  <div class="page-header"><div><div class="page-title">📊 總覽</div><div class="page-sub" id="today-date"></div></div></div>
+  <div class="stats-row">
+    <div class="stat-card"><div class="stat-label">本週淨損益</div><div class="stat-val green" id="dash-weekly">$0</div></div>
+    <div class="stat-card"><div class="stat-label">本月淨損益</div><div class="stat-val blue" id="dash-monthly">$0</div></div>
+    <div class="stat-card"><div class="stat-label">應收合計</div><div class="stat-val green" id="dash-recv">$0</div></div>
+    <div class="stat-card"><div class="stat-label">應付合計</div><div class="stat-val red" id="dash-pay">$0</div></div>
   </div>
-
-  <!-- ACCOUNTS -->
-  <div class="page" id="page-accounts">
-    <div class="page-header flex-between">
-      <div>
-        <div class="page-title">🏦 帳號管理</div>
-        <div class="page-sub">管理所有球類帳號及分成設定</div>
-      </div>
-      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-        <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text3);cursor:pointer;">
-          <input type="checkbox" id="acc-show-disabled" onchange="renderAccounts()"> 顯示停用帳號
-        </label>
-        <button class="btn btn-primary" onclick="openAccountModal()">＋ 新增帳號</button>
-      </div>
-    </div>
-    <div class="card">
-      <div class="table-wrap">
-        <table id="accounts-table">
-          <thead><tr>
-            <th>帳號</th><th>類型</th><th>本週</th><th>交收對象</th><th>我佔成</th><th>下線分成</th><th>退水</th><th>本月月退金額</th><th>操作</th>
-          </tr></thead>
-          <tbody id="accounts-body"></tbody>
-        </table>
-      </div>
-    </div>
+  <div class="grid-2">
+    <div class="card"><div class="card-title">最近記錄</div><div id="dash-recent"></div></div>
+    <div class="card"><div class="card-title">帳號本週摘要</div><div id="dash-accounts"></div></div>
   </div>
+</div>
 
-  <!-- CONTACTS -->
-  <div class="page" id="page-contacts">
-    <div class="page-header flex-between">
-      <div>
-        <div class="page-title">聯絡人管理</div>
-        <div class="page-sub">上線、下線及客人</div>
-      </div>
-      <button class="btn btn-primary" onclick="openContactModal()">＋ 新增聯絡人</button>
-    </div>
-    <div class="card">
-      <div class="table-wrap">
-        <table>
-          <thead><tr>
-            <th>名稱</th><th>角色</th><th>備註</th><th>操作</th>
-          </tr></thead>
-          <tbody id="contacts-body"></tbody>
-        </table>
-      </div>
-    </div>
+<div class="page" id="page-accounts">
+  <div class="page-header">
+    <div><div class="page-title">📋 帳號管理</div><div class="page-sub">設定每條線的上下家、水數、股東佔成</div></div>
+    <button class="btn btn-primary" onclick="openAccountModal()">＋ 新增帳號</button>
   </div>
+  <div id="accounts-list"></div>
+</div>
 
-  <!-- RECORDS -->
-  <div class="page" id="page-records">
-    <div class="page-header flex-between">
-      <div>
-        <div class="page-title">輸贏記錄</div>
-        <div class="page-sub">依週期記錄各帳號輸贏</div>
-      </div>
+<div class="page" id="page-contacts">
+  <div class="page-header">
+    <div><div class="page-title">👥 聯絡人</div><div class="page-sub">管理上家、下家、股東名單</div></div>
+    <button class="btn btn-primary" onclick="openContactModal()">＋ 新增聯絡人</button>
+  </div>
+  <div id="contacts-list"></div>
+</div>
+
+<div class="page" id="page-records">
+  <div class="page-header">
+    <div><div class="page-title">📝 輸贏記錄</div><div class="page-sub">每週記錄各帳號的輸贏與流水</div></div>
+    <div class="btn-row">
+      <select id="records-week-filter" onchange="renderRecords()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:7px 12px;font-size:13px;outline:none;min-width:200px;"></select>
       <button class="btn btn-primary" onclick="openRecordModal()">＋ 新增記錄</button>
     </div>
-    <div class="card" style="margin-bottom:16px;padding:14px 20px;">
-      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-        <span style="font-size:13px;color:var(--text2);font-weight:600;">篩選週期：</span>
-        <select id="records-week-filter" onchange="renderRecords()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:7px 12px;font-size:13px;outline:none;min-width:240px;"></select>
-        <select id="records-type-filter" onchange="renderRecords()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:7px 12px;font-size:13px;outline:none;">
-          <option value="all">所有類型</option>
-          <option value="sports">體育投注</option>
-          <option value="baccarat">百家樂</option>
-        </select>
-        <div id="records-week-summary" style="margin-left:auto;font-size:13px;"></div>
-      </div>
-    </div>
-    <div id="records-grouped"></div>
   </div>
+  <div id="records-list"></div>
+</div>
 
-  <!-- SETTLEMENT -->
-  <div class="page" id="page-settlement">
-    <div class="page-header">
-      <div class="page-title">結算總覽</div>
-      <div class="page-sub">各人應收/應付匯總</div>
-    </div>
-    <div class="actions-row">
-      <select id="settle-period" class="btn btn-ghost" onchange="renderSettlement()" style="padding:8px 14px;cursor:pointer;">
-        <option value="week">本週</option>
-        <option value="month" selected>本月</option>
-        <option value="all">全部</option>
-      </select>
-    </div>
-    <div id="settlement-content"></div>
+<div class="page" id="page-settlement">
+  <div class="page-header">
+    <div><div class="page-title">💰 每週結算</div><div class="page-sub">每週一結算，計算水錢、分成、應收應付</div></div>
+    <select id="settle-week-filter" onchange="renderSettlement()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:7px 12px;font-size:13px;outline:none;min-width:200px;"></select>
   </div>
+  <div id="settlement-content"></div>
+</div>
 
-  <!-- REPORT -->
-  <div class="page" id="page-report">
-    <div class="page-header">
-      <div class="page-title">報表</div>
-      <div class="page-sub">每週 / 每月損益報表</div>
-    </div>
-    <div class="tabs">
-      <div class="tab active" onclick="switchReportTab('weekly',this)">週報表</div>
-      <div class="tab" onclick="switchReportTab('monthly',this)">月報表</div>
-    </div>
-    <div id="report-weekly" class="report-tab"></div>
-    <div id="report-monthly" class="report-tab" style="display:none"></div>
+<div class="page" id="page-monthly">
+  <div class="page-header">
+    <div><div class="page-title">📅 月結利潤</div><div class="page-sub">月初結算上月利潤退水</div></div>
+    <select id="monthly-filter" onchange="renderMonthly()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:7px 12px;font-size:13px;outline:none;min-width:160px;"></select>
   </div>
+  <div id="monthly-content"></div>
+</div>
 
-  <!-- STATEMENT -->
-  <div class="page" id="page-statement">
-    <div class="page-header">
-      <div class="page-title">對帳明細</div>
-      <div class="page-sub">產生給對方的明細單</div>
-    </div>
-    <div class="card" style="margin-bottom:16px;">
-      <div class="form-grid form-grid-2" style="margin-bottom:14px;">
-        <div class="form-group">
-          <label>選擇對象</label>
-          <select id="stmt-contact"></select>
-        </div>
-        <div class="form-group">
-          <label>選擇週期</label>
-          <select id="stmt-week">
-            <option value="all">全部（不限週期）</option>
-          </select>
-        </div>
-      </div>
-      <div style="display:flex;gap:10px;">
-        <button class="btn btn-primary" onclick="renderStatement()">產生明細</button>
-        <button class="btn btn-ghost" onclick="printStatement()">🖨️ 列印</button>
-      </div>
-    </div>
-    <div id="statement-output"></div>
+<div class="page" id="page-verify">
+  <div class="page-header">
+    <div><div class="page-title">✅ 對帳驗證</div><div class="page-sub">驗證每筆記錄：上家交收 ＝ 股東合計 ＋ 我的淨收</div></div>
+    <select id="verify-week-filter" onchange="renderVerify()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:7px 12px;font-size:13px;outline:none;min-width:200px;"></select>
   </div>
+  <div id="verify-content"></div>
+</div>
 
-</div><!-- /main -->
+</div>
 
-<!-- TOAST -->
-<div class="toast" id="toast"></div>
+<div class="bottom-nav" id="bottom-nav">
+  <div class="bottom-nav-item active" onclick="goPage('dashboard')" data-page="dashboard"><span class="bn-icon">📊</span><span>總覽</span></div>
+  <div class="bottom-nav-item" onclick="goPage('accounts')" data-page="accounts"><span class="bn-icon">📋</span><span>帳號</span></div>
+  <div class="bottom-nav-item" onclick="goPage('records')" data-page="records"><span class="bn-icon">📝</span><span>記錄</span></div>
+  <div class="bottom-nav-item" onclick="goPage('settlement')" data-page="settlement"><span class="bn-icon">💰</span><span>結算</span></div>
+  <div class="bottom-nav-item" onclick="showMoreMenu()" id="bn-more"><span class="bn-icon">☰</span><span>更多</span></div>
+</div>
+<div id="more-menu" style="display:none;position:fixed;bottom:70px;right:10px;z-index:300;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:8px;min-width:160px;box-shadow:0 8px 24px rgba(0,0,0,.5);">
+  <div class="nav-item" onclick="goPage('contacts');hideMoreMenu()"><span class="nav-icon">👥</span>聯絡人</div>
+  <div class="nav-item" onclick="goPage('monthly');hideMoreMenu()"><span class="nav-icon">📅</span>月結利潤</div>
+  <div class="nav-item" onclick="goPage('verify');hideMoreMenu()"><span class="nav-icon">✅</span>對帳驗證</div>
+  <div class="nav-item" onclick="showPwManager();hideMoreMenu()"><span class="nav-icon">🔐</span>帳密管理</div>
+  <div class="nav-item" onclick="exportData();hideMoreMenu()"><span class="nav-icon">📤</span>匯出備份</div>
+  <div class="nav-item" onclick="document.getElementById('import-file').click();hideMoreMenu()"><span class="nav-icon">📥</span>匯入備份</div>
+  <div class="nav-item" onclick="doLogout()" style="color:var(--red)"><span class="nav-icon">🚪</span>登出</div>
+</div>
+<input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(this.files[0])">
 
-<!-- MODAL: Account -->
+<!-- Account Modal -->
 <div class="overlay" id="modal-account">
-  <div class="modal">
-    <div class="modal-title" id="account-modal-title">新增帳號</div>
-    <div class="form-grid">
-      <div class="form-grid form-grid-2">
-        <div class="form-group"><label>帳號名稱</label><input id="a-name" placeholder="如 W6837"></div>
-        <div class="form-group"><label>站台名稱</label><input id="a-site" placeholder="如 OB站、A站"></div>
-      </div>
-      <div class="form-grid form-grid-3">
-        <div class="form-group"><label>帳號類型</label>
-          <select id="a-type" onchange="onAccountTypeChange()">
-            <option value="sports">體育投注</option>
-            <option value="baccarat">百家樂</option>
-            <option value="539">539</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>交收對象 <span style="color:var(--text3);font-size:11px;">誰給我這個帳號（跟誰結算）</span></label>
-          <select id="a-counterparty"><option value="">-- 無 --</option></select>
-        </div>
-        <div class="form-group">
-          <label>交收佔成 (%) <span style="color:var(--text3);font-size:11px;">交收對象的佔成</span></label>
-          <input id="a-counterparty-pct" type="number" min="0" max="100" placeholder="如 80" oninput="updateMyPct()">
-        </div>
-      </div>
-      <div class="form-grid form-grid-2">
-        <div class="form-group">
-          <label>我的佔成 (%) <span style="color:var(--text3);font-size:11px;">自動 = 交收% - 下線合計%</span></label>
-          <input id="a-mypct" type="number" min="0" max="100" placeholder="自動計算" style="background:var(--surface);opacity:.7;" readonly>
-        </div>
-        <div class="form-group"><label>上線(給我帳號的人)</label>
-          <select id="a-upline"><option value="">-- 無/自己的帳號 --</option></select>
-        </div>
-      </div>
-      <div id="a-rebate-section" style="display:none;">
-        <div class="form-grid form-grid-2" style="margin-bottom:8px;">
-          <div class="form-group"><label>交收退水（收） <span style="color:var(--text3);font-size:11px;">交收對象退給我每萬多少（如110）</span></label><input id="a-rebate" type="number" placeholder="如 110"></div>
-          <div class="form-group"><label>交收對象月退% <span style="color:var(--text3);font-size:11px;">交收對象獲利後退給我</span></label><input id="a-monthly-ret" type="number" min="0" max="100" placeholder="0"></div>
-        </div>
+  <div class="modal" style="max-width:700px;">
+    <div class="modal-title">📋 帳號設定</div>
+    <div class="form-grid form-grid-2 mb-16">
+      <div class="form-group"><label>帳號名稱</label><input id="acc-name" placeholder="例：A線"></div>
+      <div class="form-group"><label>角色</label>
+        <select id="acc-role" onchange="onAccRoleChange()">
+          <option value="middle">中間人（有上下家）</option>
+          <option value="banker">莊家（自己吃單）</option>
+        </select>
       </div>
     </div>
-    <hr class="divider">
-    <div style="display:flex;justify-content:space-between;align-items:center;">
-      <div class="card-title" style="margin:0;">下線分成設定</div>
-      <div id="pct-check" style="font-size:12px;color:var(--text3);"></div>
-    </div>
-    <div class="share-list" id="share-list">
-      <div class="share-header" style="display:grid;grid-template-columns:1fr 80px 80px 80px 36px;gap:6px;font-size:11px;color:var(--text3);padding:0 2px;">
-        <span>人員</span><span style="text-align:center">佔成%</span><span style="text-align:center">我退他/萬</span><span style="text-align:center">月退%</span><span></span>
+    <div id="acc-upper-section">
+      <div style="font-size:12px;font-weight:700;color:var(--accent2);margin-bottom:8px;letter-spacing:.5px;">▲ 上家設定</div>
+      <div class="form-grid form-grid-3 mb-16">
+        <div class="form-group"><label>上家名稱</label><input id="acc-upper-name" placeholder="上家名稱"></div>
+        <div class="form-group"><label>交收比例 %</label><input id="acc-upper-pct" type="number" placeholder="50" min="0" max="100" oninput="checkAccPct()"></div>
+        <div class="form-group"><label>退水數（0=不退）</label><input id="acc-upper-water" type="number" placeholder="115" min="0"></div>
       </div>
     </div>
-    <button class="btn btn-ghost btn-sm mt-8" onclick="addShareRow()">＋ 新增下線</button>
+    <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:8px;letter-spacing:.5px;">▼ 下家 / 股東分成</div>
+    <div class="text-sm mb-12">設定名稱、佔成比例、退水數。所有人比例合計應為 100%。</div>
+    <div id="acc-shares"></div>
+    <button class="btn btn-ghost btn-sm mt-8 mb-16" onclick="addAccShare()">＋ 新增股東/下家</button>
+    <div style="font-size:12px;font-weight:700;color:var(--yellow);margin-bottom:8px;letter-spacing:.5px;">📊 後統分單成本</div>
+    <div class="form-grid form-grid-2 mb-12">
+      <div class="form-group"><label>後統成本比例 %</label><input id="acc-backend-pct" type="number" value="5.5" step="0.1" min="0"></div>
+      <div class="form-group"><label>基準水數（差額水計算基準）</label><input id="acc-base-water" type="number" placeholder="100" min="0"></div>
+    </div>
+    <div id="acc-pct-check" class="verify-row" style="display:none;"></div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeModal('modal-account')">取消</button>
       <button class="btn btn-primary" onclick="saveAccount()">儲存</button>
@@ -577,21 +308,13 @@
   </div>
 </div>
 
-<!-- MODAL: Contact -->
+<!-- Contact Modal -->
 <div class="overlay" id="modal-contact">
-  <div class="modal">
-    <div class="modal-title">新增聯絡人</div>
-    <div class="form-grid">
-      <div class="form-group"><label>名稱</label><input id="c-name" placeholder="如 A、B、上線王"></div>
-      <div class="form-group"><label>角色</label>
-        <select id="c-role">
-          <option value="upline">上線</option>
-          <option value="downline">下線</option>
-          <option value="customer">客人</option>
-          <option value="other">其他</option>
-        </select>
-      </div>
-      <div class="form-group"><label>備註</label><input id="c-note" placeholder="選填"></div>
+  <div class="modal" style="max-width:420px;">
+    <div class="modal-title">👤 聯絡人</div>
+    <div class="form-grid mb-12">
+      <div class="form-group"><label>名稱</label><input id="ct-name" placeholder="名稱"></div>
+      <div class="form-group"><label>備註</label><input id="ct-note" placeholder="備註（選填）"></div>
     </div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeModal('modal-contact')">取消</button>
@@ -600,48 +323,20 @@
   </div>
 </div>
 
-<!-- MODAL: Record -->
+<!-- Record Modal -->
 <div class="overlay" id="modal-record">
-  <div class="modal">
-    <div class="modal-title" id="record-modal-title">新增輸贏記錄</div>
-    <div class="form-grid">
+  <div class="modal" style="max-width:520px;">
+    <div class="modal-title">📝 輸贏記錄</div>
+    <div class="form-grid mb-12">
+      <div class="form-group"><label>帳號</label><select id="rec-account" onchange="previewRecord()"></select></div>
       <div class="form-grid form-grid-2">
-        <div class="form-group">
-          <label>帳號</label>
-          <select id="r-account" onchange="onRecordAccountChange()">
-            <option value="">-- 選擇帳號 --</option>
-          </select>
-        </div>
-        <div class="form-group" id="r-week-group">
-          <label id="r-week-label">選擇週期</label>
-          <select id="r-week" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:9px 12px;font-size:13px;outline:none;">
-            <option value="">-- 請先選擇帳號 --</option>
-          </select>
-        </div>
+        <div class="form-group"><label>輸贏金額（客戶輸為負）</label><input id="rec-result" type="number" placeholder="-10000" oninput="previewRecord()"></div>
+        <div class="form-group"><label>流水金額</label><input id="rec-turnover" type="number" placeholder="100000" oninput="previewRecord()"></div>
       </div>
-      <div class="form-group" id="r-customer-group" style="display:none;">
-        <label>客人 <span style="color:var(--text3);font-size:11px;">選誰是這筆帳的客人（我直接收錢的對象）</span></label>
-        <select id="r-customer" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:9px 12px;font-size:13px;outline:none;">
-          <option value="">-- 無（純上下線分成）--</option>
-        </select>
-      </div>
-      <div class="form-grid form-grid-2">
-        <div class="form-group">
-          <label>客人輸贏 <span style="color:var(--text3);font-size:11px;">正數=客人贏／負數=客人輸</span></label>
-          <input type="number" id="r-winloss" placeholder="如 50000 或 -50000" oninput="calcPreview()">
-        </div>
-        <div class="form-group" id="r-sports-rebate-group" style="display:none;">
-          <label>球類水 <span style="color:var(--text3);font-size:11px;">代理收的水（從輸贏扣掉後才是名義輸贏）</span></label>
-          <input type="number" id="r-sports-rebate" placeholder="如 30000" value="0" oninput="calcPreview()">
-        </div>
-      </div>
-      <div class="form-group" id="r-flow-group" style="display:none;">
-        <label>百家樂流水（元） <span style="color:var(--text3);font-size:11px;">如10萬流水請輸入100000</span></label>
-        <input type="number" id="r-flow" placeholder="如 100000" value="0" oninput="calcPreview()">
-      </div>
-      <div class="form-group"><label>備註</label><input id="r-note" placeholder="選填"></div>
+      <div class="form-group"><label>週次</label><select id="rec-week"></select></div>
+      <div class="form-group"><label>備註</label><input id="rec-note" placeholder="選填"></div>
     </div>
-    <div id="record-preview" style="margin-top:14px;"></div>
+    <div id="rec-preview" class="card mt-8" style="display:none;"></div>
     <div class="modal-actions">
       <button class="btn btn-ghost" onclick="closeModal('modal-record')">取消</button>
       <button class="btn btn-primary" onclick="saveRecord()">儲存</button>
@@ -649,1570 +344,430 @@
   </div>
 </div>
 
-
-<script>
-// ========== DATA STORE ==========
-let DB = {
-  contacts: [],
-  accounts: [],
-  records: [],
-  _editAccountIdx: -1,
-  _editRecordIdx: -1,
-};
-
-// save() and load() are replaced by API calls below (after API HELPERS section)
-// Stub so any legacy calls don't crash before API helpers load
-function save() { _apiSave(); }
-function load() { /* no-op, replaced by loadFromServer() */ }
-
-// ========== NAV ==========
-function goPage(name) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('page-'+name).classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(n => {
-    if(n.getAttribute('onclick') && n.getAttribute('onclick').includes(name)) n.classList.add('active');
-  });
-  document.querySelectorAll('.bottom-nav-item').forEach(n => {
-    n.classList.toggle('active', n.dataset.page === name);
-  });
-  hideMoreMenu();
-  if(name==='dashboard') renderDashboard();
-  if(name==='accounts') renderAccounts();
-  if(name==='contacts') renderContacts();
-  if(name==='records') renderRecords();
-  if(name==='settlement') renderSettlement();
-  if(name==='report') renderReport();
-  if(name==='statement') renderStatementSetup();
-}
-
-function showMoreMenu() {
-  const m = document.getElementById('more-menu');
-  m.style.display = m.style.display === 'none' ? 'block' : 'none';
-}
-function hideMoreMenu() {
-  const m = document.getElementById('more-menu');
-  if(m) m.style.display = 'none';
-}
-document.addEventListener('click', e => {
-  if(!e.target.closest('#more-menu') && !e.target.closest('#bn-more')) hideMoreMenu();
-});
-
-// ========== PASSWORD SYSTEM ==========
-const PW_KEY = 'ballDB_pw';
-
-
-
-
-
-// ========== PASSWORD MANAGER ==========
-function showPwManager() {
-  renderPwList();
-  document.getElementById('modal-pwmanager').classList.add('open');
-}
-
-
-
-// ========== UTILS ==========
-function fmt(n) {
-  if(n==null) return '0';
-  const abs = Math.abs(n);
-  const s = abs.toLocaleString('zh-TW');
-  return (n>=0?'+':'-') + s;
-}
-function fmtAbs(n) { return (n||0).toLocaleString('zh-TW'); }
-function toast(msg) {
-  const t=document.getElementById('toast');
-  t.textContent=msg; t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),2200);
-}
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-function getWeekRange() {
-  const mon = getMondayOfWeek(todayStr());
-  const sun = addDays(mon, 6);
-  return [mon, sun];
-}
-// 取得某日期對應的週期 key（週一日期字串）
-// 體育：週一00:00 ~ 週日23:59（依日期，不含時間）
-// 百家樂：週一12:00前算上週 → 輸入時間若為百家樂且為週一，要判斷是否填寫了「屬於上週」
-// 這裡簡化：記錄時讓使用者自己填日期，程式依日期週一為基準分週
-function getWeekKey(dateStr) {
-  return getWeekKeyForRecord(dateStr, 'sports');
-}
-function getWeekLabel(monStr) {
-  return getWeekLabelFromKey(monStr, 'sports');
-}
-function getMonthRange() {
-  const now=new Date();
-  const first=new Date(now.getFullYear(),now.getMonth(),1).toISOString().slice(0,10);
-  const last=new Date(now.getFullYear(),now.getMonth()+1,0).toISOString().slice(0,10);
-  return [first, last];
-}
-function inRange(date, from, to) { return date>=from && date<=to; }
-
-// ========== CONTACTS ==========
-function openContactModal() { document.getElementById('modal-contact').classList.add('open'); }
-function saveContact() {
-  const name = document.getElementById('c-name').value.trim();
-  if(!name) { toast('請填寫名稱'); return; }
-  DB.contacts.push({ name, role: document.getElementById('c-role').value, note: document.getElementById('c-note').value });
-  save(); closeModal('modal-contact');
-  document.getElementById('c-name').value=''; document.getElementById('c-note').value='';
-  renderContacts(); toast('已新增聯絡人');
-}
-function renderContacts() {
-  const roleLabel = {upline:'上線',downline:'下線',customer:'客人',other:'其他'};
-  const roleClass = {upline:'badge-yellow',downline:'badge-blue',customer:'badge-green',other:'badge-blue'};
-  const tbody = document.getElementById('contacts-body');
-  if(!DB.contacts.length) { tbody.innerHTML='<tr><td colspan=4 style="text-align:center;padding:30px;color:var(--text3)">尚無聯絡人</td></tr>'; return; }
-  tbody.parentElement.onclick = function(e) {
-    const btn = e.target.closest('.con-del');
-    if(btn) {
-      const i = parseInt(btn.dataset.idx);
-      DB.contacts.splice(i,1); save(); renderContacts(); toast('✅ 已刪除聯絡人');
-    }
-  };
-  tbody.innerHTML = DB.contacts.map((c,i)=>`
-    <tr>
-      <td><b>${c.name}</b></td>
-      <td><span class="badge ${roleClass[c.role]}">${roleLabel[c.role]}</span></td>
-      <td style="color:var(--text3)">${c.note||'-'}</td>
-      <td><button class="btn btn-danger btn-sm con-del" data-idx="${i}">刪除</button></td>
-    </tr>`).join('');
-}
-function deleteContact(i) {
-  DB.contacts.splice(i,1); save(); renderContacts(); toast('✅ 已刪除聯絡人');
-}
-
-// ========== ACCOUNTS ==========
-function onAccountTypeChange() {
-  const type = document.getElementById('a-type').value;
-  // baccarat: show rebate+monthly; sports/539: hide
-  document.getElementById('a-rebate-section').style.display = type === 'baccarat' ? '' : 'none';
-  if(type !== 'baccarat') {
-    document.getElementById('a-rebate').value = '0';
-    document.getElementById('a-monthly-ret').value = '0';
-  }
-}
-
-function openAccountModal(idx=-1) {
-  DB._editAccountIdx = idx;
-  document.getElementById('account-modal-title').textContent = idx>=0?'編輯帳號':'新增帳號';
-
-  const shareHeader = `<div class="share-header" style="display:grid;grid-template-columns:1fr 80px 80px 80px 36px;gap:6px;font-size:11px;color:var(--text3);padding:0 2px;">
-    <span>人員</span><span style="text-align:center">佔成%</span><span style="text-align:center">我退他/萬</span><span style="text-align:center">月退%</span><span></span>
-  </div>`;
-
-  // populate selects
-  const ul = document.getElementById('a-upline');
-  ul.innerHTML = '<option value="">-- 無/自己的帳號 --</option>';
-  const cp = document.getElementById('a-counterparty');
-  cp.innerHTML = '<option value="">-- 無 --</option>';
-  DB.contacts.forEach(c => {
-    ul.innerHTML += `<option value="${c.name}">${c.name}</option>`;
-    cp.innerHTML += `<option value="${c.name}">${c.name}</option>`;
-  });
-
-  if(idx < 0) {
-    ['a-name','a-site','a-mypct','a-rebate','a-monthly-ret','a-counterparty-pct'].forEach(id=>document.getElementById(id).value='');
-    document.getElementById('a-upline').value='';
-    document.getElementById('a-counterparty').value='';
-    document.getElementById('a-type').value='sports';
-    document.getElementById('a-rebate-section').style.display='none';
-    document.getElementById('share-list').innerHTML = shareHeader;
-  } else {
-    const a = DB.accounts[idx];
-    document.getElementById('a-name').value = a.name;
-    document.getElementById('a-site').value = a.site||'';
-    document.getElementById('a-type').value = a.type||'sports';
-    document.getElementById('a-rebate').value = a.rebate||'';
-    document.getElementById('a-monthly-ret').value = a.monthlyRet||'';
-    document.getElementById('a-counterparty').value = a.counterparty||'';
-    document.getElementById('a-counterparty-pct').value = a.counterpartyPct||'';
-    ul.value = a.upline||'';
-    document.getElementById('a-rebate-section').style.display = a.type==='baccarat' ? '' : 'none';
-    document.getElementById('share-list').innerHTML = shareHeader;
-    (a.shares||[]).forEach(s=>addShareRow(s));
-  }
-  updateMyPct();
-  document.getElementById('modal-account').classList.add('open');
-}
-
-function updateMyPct() {
-  const cpPct = parseFloat(document.getElementById('a-counterparty-pct').value)||0;
-  // Sum all share rows' pct inputs
-  const rows = document.querySelectorAll('#share-list .share-row');
-  let shareSum = 0;
-  rows.forEach(row => {
-    const ins = row.querySelectorAll('input');
-    shareSum += parseFloat(ins[0]?.value)||0;
-  });
-  const myPct = cpPct - shareSum;
-  document.getElementById('a-mypct').value = myPct > 0 ? myPct : 0;
-  const chk = document.getElementById('pct-check');
-  if(chk) {
-    if(cpPct === 0) { chk.textContent=''; return; }
-    const ok = Math.abs(shareSum + myPct - cpPct) < 0.01;
-    chk.textContent = ok ? `✅ 合計${cpPct}%` : `⚠️ 下線${shareSum}% + 我${myPct}% = ${shareSum+myPct}%（應等於${cpPct}%）`;
-    chk.style.color = ok ? 'var(--accent)' : 'var(--yellow)';
-  }
-}
-
-function addShareRow(data={}) {
-  const div = document.createElement('div');
-  div.className='share-row';
-  const opts = DB.contacts.map(c=>`<option value="${c.name}" ${c.name==data.name?'selected':''}>${c.name}</option>`).join('');
-  div.style.gridTemplateColumns = '1fr 80px 80px 80px 36px';
-  const iStyle = 'text-align:center;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:8px;font-size:13px;width:100%;box-sizing:border-box;';
-  div.innerHTML = `
-    <select style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:8px 10px;font-size:13px;outline:none;">
-      <option value="">-- 選人 --</option>${opts}
-    </select>
-    <input type="number" min="0" max="100" placeholder="%" value="${data.pct||''}" style="${iStyle}" oninput="updateMyPct()">
-    <input type="number" min="0" placeholder="退水" value="${data.rebate||''}" style="${iStyle}">
-    <input type="number" min="0" max="100" placeholder="月退%" value="${data.monthlyRet||''}" style="${iStyle}">
-    <button class="icon-btn" onclick="this.parentElement.remove();updateMyPct()">✕</button>
-  `;
-  document.getElementById('share-list').appendChild(div);
-}
-
-function saveAccount() {
-  const name = document.getElementById('a-name').value.trim();
-  if(!name) { toast('請填帳號名稱'); return; }
-  const counterparty = document.getElementById('a-counterparty').value;
-  const counterpartyPct = parseFloat(document.getElementById('a-counterparty-pct').value)||0;
-  const myPct = parseFloat(document.getElementById('a-mypct').value)||0;
-  const shares = [];
-  document.querySelectorAll('#share-list .share-row').forEach(row=>{
-    const sel=row.querySelector('select');
-    const ins=row.querySelectorAll('input');
-    if(sel.value) shares.push({name:sel.value, pct:parseFloat(ins[0].value)||0, rebate:parseFloat(ins[1].value)||0, monthlyRet:parseFloat(ins[2].value)||0});
-  });
-  const obj = {
-    name, site: document.getElementById('a-site').value,
-    type: document.getElementById('a-type').value,
-    myPct, counterparty, counterpartyPct,
-    upline: document.getElementById('a-upline').value,
-    rebate: parseFloat(document.getElementById('a-rebate').value)||0,
-    monthlyRet: parseFloat(document.getElementById('a-monthly-ret').value)||0,
-    shares
-  };
-  if(DB._editAccountIdx>=0) DB.accounts[DB._editAccountIdx]=obj;
-  else DB.accounts.push(obj);
-  save(); closeModal('modal-account'); renderAccounts(); toast('已儲存帳號');
-}
-
-function getThisWeekKey(type) {
-  const today = new Date().toISOString().slice(0,10);
-  return getWeekKeyForRecord(today, type);
-}
-
-function renderAccounts() {
-  const typeLabel={sports:'體育投注',baccarat:'百家樂','539':'539'};
-  const tbody=document.getElementById('accounts-body');
-  // Filter: show active by default, hidden if disabled
-  const showDisabled = document.getElementById('acc-show-disabled')?.checked;
-  const visible = DB.accounts.filter((a,i) => showDisabled || !a.disabled);
-
-  if(!visible.length) {
-    tbody.innerHTML=`<tr><td colspan=9 style="text-align:center;padding:30px;color:var(--text3)">${showDisabled?'尚無帳號':'沒有啟用中的帳號'}</td></tr>`;
-    return;
-  }
-
-  // Build week-record map: accountName -> thisWeek record
-  const weekRecords = {};
-  DB.records.forEach(r => {
-    const acc = DB.accounts.find(a => a.name === r.account && a.site === r.site);
-    if(!acc) return;
-    const thisWk = getThisWeekKey(r.accountType);
-    if(r.weekKey === thisWk) weekRecords[r.account + '|' + (r.site||'')] = r;
-  });
-
-  tbody.parentElement.onclick = function(e) {
-    const delBtn = e.target.closest('.acc-del');
-    const disBtn = e.target.closest('.acc-toggle-dis');
-    const mrSave = e.target.closest('.acc-mr-save');
-    if(delBtn) {
-      const i = parseInt(delBtn.dataset.idx);
-      DB.accounts.splice(i,1); save(); renderAccounts(); toast('✅ 已刪除帳號');
-    }
-    if(disBtn) {
-      const i = parseInt(disBtn.dataset.idx);
-      DB.accounts[i].disabled = !DB.accounts[i].disabled;
-      save(); renderAccounts();
-      toast(DB.accounts[i]?.disabled ? '已停用帳號' : '已啟用帳號');
-    }
-    if(mrSave) {
-      const i = parseInt(mrSave.dataset.idx);
-      const val = parseFloat(document.getElementById('mr-input-'+i).value) || 0;
-      if(!DB.accounts[i].monthRetEntries) DB.accounts[i].monthRetEntries = [];
-      const ym = new Date().toISOString().slice(0,7);
-      const existing = DB.accounts[i].monthRetEntries.find(e => e.ym === ym);
-      if(existing) existing.amount = val;
-      else DB.accounts[i].monthRetEntries.push({ ym, amount: val });
-      save(); toast('✅ 月退已儲存');
-    }
-  };
-
-  const realIdx = (visIdx) => DB.accounts.indexOf(visible[visIdx]);
-
-  tbody.innerHTML = visible.map((a, vi) => {
-    const i = realIdx(vi);
-    const key = a.name + '|' + (a.site||'');
-    const thisWkRec = weekRecords[key];
-    const typeCls = {sports:'badge-yellow',baccarat:'badge-blue','539':'badge-green'}[a.type]||'badge-blue';
-    const sharesStr = (a.shares||[]).length ? a.shares.map(s=>`${s.name} ${s.pct}%`).join('、') : '-';
-    const rebateStr = (a.type==='baccarat' && a.rebate>0) ? `每萬退${a.rebate}` : '-';
-    const cpStr = a.counterparty ? `<span style="color:var(--accent2)">${a.counterparty}</span> <span style="color:var(--text3)">${a.counterpartyPct}%</span>` : '-';
-    const disStyle = a.disabled ? 'opacity:0.45;' : '';
-
-    // Week status badge
-    let wkBadge;
-    if(a.disabled) {
-      wkBadge = '<span class="badge" style="background:#444;color:#999;font-size:10px;">停用</span>';
-    } else if(thisWkRec) {
-      const pnl = thisWkRec.myPnl || 0;
-      const cls = pnl >= 0 ? 'text-green' : 'text-red';
-      wkBadge = `<span class="badge badge-green" style="font-size:10px;">✅ 已記</span><br><span class="mono ${cls}" style="font-size:11px;">${fmt(pnl)}</span>`;
-    } else {
-      wkBadge = '<span class="badge badge-red" style="font-size:10px;">⚠️ 未記</span>';
-    }
-
-    // Monthly ret input for this month
-    const ym = new Date().toISOString().slice(0,7);
-    const mrEntry = (a.monthRetEntries||[]).find(e => e.ym === ym);
-    const mrVal = mrEntry ? mrEntry.amount : '';
-
-    return `<tr style="${disStyle}">
-      <td><b>${a.name}</b>${a.site?`<br><span class="text-sm">${a.site}</span>`:''}</td>
-      <td><span class="badge ${typeCls}" style="font-size:11px;">${typeLabel[a.type]||a.type}</span></td>
-      <td>${wkBadge}</td>
-      <td>${cpStr}</td>
-      <td class="mono text-green">${a.myPct||0}%</td>
-      <td style="color:var(--text3);font-size:12px;">${sharesStr}</td>
-      <td style="color:var(--text2)">${rebateStr}</td>
-      <td>
-        <div style="display:flex;align-items:center;gap:4px;">
-          <input id="mr-input-${i}" type="number" placeholder="金額" value="${mrVal}"
-            style="width:80px;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:4px 6px;font-size:12px;outline:none;">
-          <button class="btn btn-ghost btn-sm acc-mr-save" data-idx="${i}" style="font-size:11px;padding:4px 8px;">存</button>
-        </div>
-        ${mrVal ? `<div style="font-size:11px;color:var(--text3);margin-top:2px;">${ym} 已記 ${mrVal.toLocaleString()}</div>` : ''}
-      </td>
-      <td style="white-space:nowrap;">
-        <button class="btn btn-ghost btn-sm" onclick="openAccountModal(${i})" style="margin-bottom:3px;">編輯</button>
-        <button class="btn btn-ghost btn-sm acc-toggle-dis" data-idx="${i}" style="margin-bottom:3px;${a.disabled?'color:var(--accent);':'color:var(--text3);'}">${a.disabled?'啟用':'停用'}</button>
-        <button class="btn btn-danger btn-sm acc-del" data-idx="${i}">刪除</button>
-      </td>
-    </tr>`;
-  }).join('');
-}
-
-function deleteAccount(i) {
-  DB.accounts.splice(i,1); save(); renderAccounts(); toast('✅ 已刪除帳號');
-}
-
-// ========== WEEK GENERATION ==========
-// Sports: Mon-Sun  (weekKey = Monday date, type='sports')
-// Baccarat: Mon-Mon (weekKey = Monday date, type='baccarat', period ends NEXT Monday)
-// Generate list of weeks from a start date up to today+4 weeks
-
-function fmtMD(dateStr) {
-  // "2026-03-02" => "3/2"
-  if(!dateStr) return '';
-  const parts = dateStr.split('-');
-  return `${parseInt(parts[1])}/${parseInt(parts[2])}`;
-}
-
-function addDays(dateStr, n) {
-  // Add n days to a YYYY-MM-DD string, return YYYY-MM-DD
-  const d = new Date(dateStr + 'T12:00:00');
-  d.setDate(d.getDate() + n);
-  return d.toISOString().slice(0,10);
-}
-
-function getMondayOfWeek(dateStr) {
-  // Given any date string, return the Monday of that week (YYYY-MM-DD)
-  const d = new Date(dateStr + 'T12:00:00');
-  // getDay(): 0=Sun, 1=Mon ... 6=Sat
-  const dow = d.getDay(); // 0=Sun
-  const diffToMon = dow === 0 ? -6 : 1 - dow; // Sun goes back 6, others go back (dow-1)
-  d.setDate(d.getDate() + diffToMon);
-  return d.toISOString().slice(0,10);
-}
-
-function todayStr() {
-  return new Date().toISOString().slice(0,10);
-}
-
-function generateWeeks(type, count=26) {
-  const weeks = [];
-  // Get Monday of current week
-  const curMon = getMondayOfWeek(todayStr());
-
-  for(let i = 0; i < count; i++) {
-    const monStr = addDays(curMon, -i * 7);
-    let label, from, to;
-    if(type === 'sports') {
-      // 體育：週一 ～ 週日 (Mon to Sun, +6 days)
-      to = addDays(monStr, 6);
-      from = monStr;
-      label = `${fmtMD(from)}（一）～ ${fmtMD(to)}（日）`;
-    } else {
-      // 百家樂：週一 ～ 下週一 (Mon to next Mon, +7 days)
-      to = addDays(monStr, 7);
-      from = monStr;
-      label = `${fmtMD(from)}（一）～ ${fmtMD(to)}（一）`;
-    }
-    weeks.push({ key: monStr, from, to, label, type });
-  }
-  return weeks;
-}
-
-function getWeeksForAccount(account) {
-  return generateWeeks(account.type, 26);
-}
-
-// For a record date + account type, determine its weekKey (the Monday that starts the week)
-function safeDate(str) {
-  if(!str) return null;
-  const d = new Date(str.length === 10 ? str + 'T00:00:00' : str);
-  return isNaN(d.getTime()) ? null : d;
-}
-
-function getWeekKeyForRecord(dateStr, type) {
-  if(!dateStr) return '1970-01-05';
-  try { return getMondayOfWeek(dateStr.slice(0,10)); }
-  catch(e) { return '1970-01-05'; }
-}
-
-function getWeekLabelFromKey(weekKey, type) {
-  if(!weekKey) return '未知週期';
-  try {
-    if(type === 'baccarat') {
-      const to = addDays(weekKey, 7);
-      return `${fmtMD(weekKey)}（一）～ ${fmtMD(to)}（一）`;
-    } else {
-      const to = addDays(weekKey, 6);
-      return `${fmtMD(weekKey)}（一）～ ${fmtMD(to)}（日）`;
-    }
-  } catch(e) { return weekKey; }
-}
-
-// ========== RECORDS ==========
-function openRecordModal(idx=-1) {
-  DB._editRecordIdx = idx;
-  document.getElementById('record-modal-title').textContent = idx>=0 ? '編輯記錄' : '新增記錄';
-  const accSel = document.getElementById('r-account');
-  accSel.innerHTML = '<option value="">-- 選擇帳號 --</option>';
-  DB.accounts.forEach((a,i) => {
-    const typeLabel = {sports:'體育投注', baccarat:'百家樂', '539':'539'}[a.type] || a.type;
-    accSel.innerHTML += `<option value="${i}">[${typeLabel}] ${a.name} ${a.site?'('+a.site+')':''}`;
-  });
-
-  if(idx < 0) {
-    // 完全清空表單
-    accSel.value = '';
-    document.getElementById('r-winloss').value = '';
-    document.getElementById('r-flow').value = '0';
-    document.getElementById('r-sports-rebate').value = '0';
-    document.getElementById('r-note').value = '';
-    document.getElementById('r-week').innerHTML = '<option value="">-- 請先選擇帳號 --</option>';
-    document.getElementById('r-flow-group').style.display = 'none';
-    document.getElementById('r-sports-rebate-group').style.display = 'none';
-    document.getElementById('r-customer-group').style.display = 'none';
-    const custSel = document.getElementById('r-customer');
-    if(custSel) custSel.value = '';
-  } else {
-    const r = DB.records[idx];
-    const aIdx = DB.accounts.findIndex(a => a.name === r.account);
-    accSel.value = aIdx >= 0 ? aIdx : '';
-    document.getElementById('r-winloss').value = r.winloss || '';
-    document.getElementById('r-flow').value = r.flow || 0;
-    document.getElementById('r-sports-rebate').value = r.sportsRebate || 0;
-    document.getElementById('r-note').value = r.note || '';
-    populateWeekSelect(aIdx, r.weekKey);
-    const a = aIdx >= 0 ? DB.accounts[aIdx] : null;
-    const isBacc = a && a.type === 'baccarat';
-    document.getElementById('r-flow-group').style.display = isBacc ? '' : 'none';
-    document.getElementById('r-sports-rebate-group').style.display = (!isBacc && a) ? '' : 'none';
-    document.getElementById('r-customer-group').style.display = a ? '' : 'none';
-    // populate customer
-    const custSel = document.getElementById('r-customer');
-    custSel.innerHTML = '<option value="">-- 無（純分成）--</option>';
-    DB.contacts.forEach(c => { custSel.innerHTML += `<option value="${c.name}">${c.name}</option>`; });
-    if(r.customer) custSel.value = r.customer;
-  }
-
-  document.getElementById('record-preview').innerHTML = '';
-  document.getElementById('modal-record').classList.add('open');
-}
-
-function populateWeekSelect(aIdx, selectedKey) {
-  const weekSel = document.getElementById('r-week');
-  if(aIdx === '' || aIdx == null || aIdx < 0) {
-    weekSel.innerHTML = '<option value="">-- 請先選擇帳號 --</option>';
-    return;
-  }
-  const a = DB.accounts[parseInt(aIdx)];
-  const weeks = getWeeksForAccount(a);
-  const typeLabel = a.type === 'baccarat' ? '百家樂週期' : '體育投注週期';
-  document.getElementById('r-week-label').textContent = `選擇${typeLabel}`;
-  weekSel.innerHTML = weeks.map(w =>
-    `<option value="${w.key}" ${w.key === selectedKey ? 'selected' : ''}>${w.label}</option>`
-  ).join('');
-  if(!selectedKey && weeks.length) weekSel.value = weeks[0].key;
-}
-
-// ========== CORE CALCULATION ==========
-// winloss: 客人輸贏（正=客人贏，負=客人輸）
-// sportsRebate: 球類水（從客人輸贏中扣，剩下才是名義輸贏，下線佔成只算名義輸贏）
-// flow: 百家樂流水
-// 
-// 案例：客人輸50000，水30000 → 名義輸贏=-20000（客人輸20000）
-//   我實收客人50000，但分給下線只算名義的
-//   客人輸50000 → winloss=-50000, sportsRebate=30000
-//   名義winloss = -50000 + 30000 = -20000（客人名義上輸20000）
-//   我跟客人收 = 50000（全額）
-//   下線A佔10% → 給A = 20000 * 10% = 2000（只算名義）
-//
-function computeBreakdown(account, winloss, sportsRebate, flow) {
-  // 輸贏：正=客人贏（我付錢給交收對象），負=客人輸（交收對象付我）
-  // 流水單位：元（10萬流水 = 100000）
-  // 水 = flow/10000 × rebate
-  //
-  // amount 正 = 該人欠我（我收入）
-  // amount 負 = 我欠該人（我付出）
-  //
-  // 我的總損益 = sum(所有非我的 amount)
-  //   交收對象 amount = -(winloss+water) × pct%  （客人贏→負，客人輸→正）
-  //   下線     amount = +(winloss+water) × pct%  （客人贏→正，客人輸→負）
-  //   我的損益 = 交收對象amount + 下線amount 的總和
-
-  const isBacc = account.type === 'baccarat';
-  const f = flow || 0;
-  const result = [];
-
-  if (isBacc) {
-    const myRebateRate = account.rebate || 0;
-    let myPnl = 0;
-
-    // 交收對象
-    if (account.counterparty && account.counterpartyPct > 0) {
-      const water = (f / 10000) * myRebateRate;
-      const amount = -((winloss + water) * account.counterpartyPct / 100);
-      myPnl += amount; // 負=我付出，正=我收入
-      result.push({
-        contactName: account.counterparty,
-        label: `${account.counterparty}（交收${account.counterpartyPct}%，退水${myRebateRate}/萬）`,
-        amount,
-        isCounterparty: true,
-      });
-    }
-
-    // 下線
-    (account.shares || []).forEach(sh => {
-      const shRate = sh.rebate > 0 ? sh.rebate : myRebateRate;
-      const water = (f / 10000) * shRate;
-      const amount = (winloss + water) * sh.pct / 100;
-      myPnl += amount; // 正=下線欠我，負=我欠下線
-      result.push({
-        contactName: sh.name,
-        label: `${sh.name}（${sh.pct}%，退水${shRate}/萬）`,
-        amount,
-        isShare: true,
-      });
-    });
-
-    // 我的損益 = 交收對象+下線 所有金額加總
-    result.unshift({
-      contactName: '__ME__',
-      label: `我（${account.myPct||0}%，水差獲利含在內）`,
-      amount: myPnl,
-      isMe: true,
-    });
-
-  } else {
-    // 體育/539 水邏輯：
-    //   名義輸贏 = winloss + sportsRebate
-    //   （客人輸10000，水3000 → winloss=-10000, sr=3000 → 名義=-7000）
-    //   下線/交收按「名義輸贏」算佔成
-    //   水全歸我個人，不按佔成分出去
-    //   向客人收款 = -winloss（純輸贏，不含水）
-    const sr = sportsRebate || 0;
-    const nominalWL = winloss + sr; // 名義輸贏
-    let myPnl = sr; // 水先全歸我
-
-    if (account.counterparty && account.counterpartyPct > 0) {
-      const amount = -(nominalWL * account.counterpartyPct / 100);
-      myPnl += amount;
-      result.push({
-        contactName: account.counterparty,
-        label: `${account.counterparty}（交收${account.counterpartyPct}%，名義輸贏）`,
-        amount,
-        isCounterparty: true,
-      });
-    }
-
-    (account.shares || []).forEach(sh => {
-      const amount = nominalWL * sh.pct / 100;
-      myPnl += amount;
-      result.push({
-        contactName: sh.name,
-        label: `${sh.name}（${sh.pct}%，名義輸贏）`,
-        amount,
-        isShare: true,
-      });
-    });
-
-    myPnl += nominalWL * (account.myPct || 0) / 100;
-    result.unshift({
-      contactName: '__ME__',
-      label: `我（${account.myPct||0}%${sr ? '，含水+' + fmtAbs(sr) : ''}）`,
-      amount: myPnl,
-      isMe: true,
-    });
-  }
-
-  return result;
-}
-
-
-function calcPreview() {
-  try {
-    const previewEl = document.getElementById('record-preview');
-    if(!previewEl) return;
-    const accIdx = document.getElementById('r-account').value;
-    if(accIdx === '' || accIdx == null) { previewEl.innerHTML = ''; return; }
-    const a = DB.accounts[parseInt(accIdx)];
-    if(!a) { previewEl.innerHTML = ''; return; }
-    const wl = parseFloat(document.getElementById('r-winloss').value) || 0;
-    const sr = parseFloat(document.getElementById('r-sports-rebate') && document.getElementById('r-sports-rebate').value) || 0;
-    const flow = parseFloat(document.getElementById('r-flow') && document.getElementById('r-flow').value) || 0;
-    const breakdown = computeBreakdown(a, wl, sr, flow);
-
-    const customerSel = document.getElementById('r-customer');
-    const hasCustomer = customerSel && customerSel.value;
-    const customerText = hasCustomer ? customerSel.options[customerSel.selectedIndex].text : '';
-
-    const actualCollect = -wl; // 向客人收 = -winloss（負=付給客人）
-
-    let html = `<div class="summary-box"><div class="label">本筆結算預覽</div>`;
-    if(hasCustomer && wl !== 0) {
-      const collectLabel = actualCollect >= 0 ? `向 ${customerText} 收` : `付給 ${customerText}`;
-      html += `<div style="background:rgba(34,211,238,.08);border:1px solid rgba(34,211,238,.2);border-radius:6px;padding:8px 12px;margin:8px 0;font-size:13px;display:flex;justify-content:space-between;">
-        <span style="color:var(--accent2)">💰 ${collectLabel}</span>
-        <span class="mono ${actualCollect>=0?'text-green':'text-red'}" style="font-weight:700;">${fmtAbs(Math.abs(actualCollect))}</span>
-      </div>`;
-    }
-    html += `<div style="display:grid;gap:6px;margin-top:8px;">`;
-    breakdown.forEach(b => {
-      const cls = b.amount >= 0 ? 'text-green' : 'text-red';
-      const dir = b.isMe ? '' : (b.amount < 0 ? '（我給）' : '（欠我）');
-      html += `<div style="display:flex;justify-content:space-between;font-size:13px;">
-        <span style="color:var(--text2)">${b.label}${dir}</span>
-        <span class="${cls} mono">${fmt(b.amount)}</span>
-      </div>`;
-    });
-    html += `</div></div>`;
-    previewEl.innerHTML = html;
-  } catch(e) { console.warn('calcPreview:', e); }
-}
-
-function onRecordAccountChange() {
-  const aIdx = document.getElementById('r-account').value;
-  populateWeekSelect(aIdx, null);
-
-  const flowGroup = document.getElementById('r-flow-group');
-  const srGroup = document.getElementById('r-sports-rebate-group');
-  const customerGroup = document.getElementById('r-customer-group');
-
-  if(aIdx !== '') {
-    const a = DB.accounts[parseInt(aIdx)];
-    const isBacc = a && a.type === 'baccarat';
-    const is539 = a && a.type === '539';
-
-    flowGroup.style.display = isBacc ? '' : 'none';
-    srGroup.style.display = (a && !isBacc) ? '' : 'none';
-    customerGroup.style.display = '';
-
-    if(!isBacc) document.getElementById('r-flow').value = '0';
-    if(isBacc && srGroup) document.getElementById('r-sports-rebate').value = '0';
-
-    // Populate customer dropdown from contacts
-    const custSel = document.getElementById('r-customer');
-    custSel.innerHTML = '<option value="">-- 無（純分成）--</option>';
-    DB.contacts.forEach(c => {
-      custSel.innerHTML += `<option value="${c.name}">${c.name}</option>`;
-    });
-  } else {
-    flowGroup.style.display = 'none';
-    srGroup.style.display = 'none';
-    customerGroup.style.display = 'none';
-  }
-  calcPreview();
-}
-
-function saveRecord() {
-  const accIdx = document.getElementById('r-account').value;
-  const weekKey = document.getElementById('r-week').value;
-  const wl = parseFloat(document.getElementById('r-winloss').value);
-  if(accIdx === '' || !weekKey || isNaN(wl)) { toast('請填完整資訊（帳號、週期、金額）'); return; }
-  const a = DB.accounts[parseInt(accIdx)];
-  const flow = parseFloat(document.getElementById('r-flow').value) || 0;
-  const sr = parseFloat(document.getElementById('r-sports-rebate').value) || 0;
-  const customerSel = document.getElementById('r-customer');
-  const customer = customerSel ? customerSel.value : '';
-  const breakdown = computeBreakdown(a, wl, sr, flow);
-  const myEntry = breakdown.find(b => b.isMe);
-  const isBacc = a.type === 'baccarat';
-  // 實際跟客人收付（球類含水全額）
-  const actualCollect = -wl; // 客人輸多少收多少，水是代理賺的不另計
-
-  const rec = {
-    weekKey,
-    weekLabel: getWeekLabelFromKey(weekKey, a.type),
-    accountType: a.type,
-    account: a.name,
-    site: a.site,
-    winloss: wl,
-    sportsRebate: sr,
-    flow,
-    customer,
-    actualCollect,
-    myPnl: myEntry ? myEntry.amount : 0,
-    breakdown,
-    note: document.getElementById('r-note').value,
-    settled: false,
-    createdAt: new Date().toISOString() + '_' + Math.random().toString(36).slice(2,8),
-  };
-  if(DB._editRecordIdx >= 0) DB.records[DB._editRecordIdx] = rec;
-  else DB.records.push(rec);
-  DB.records.sort((a,b) => b.weekKey.localeCompare(a.weekKey) || b.createdAt.localeCompare(a.createdAt));
-  save(); closeModal('modal-record'); renderRecords(); toast('已儲存記錄');
-}
-
-function populateRecordsWeekFilter() {
-  const sel = document.getElementById('records-week-filter');
-  if(!sel) return;
-  const current = sel.value;
-
-  // Gather all unique weekKeys from records, with labels
-  const weekMap = {};
-  DB.records.forEach(r => {
-    if(!weekMap[r.weekKey]) weekMap[r.weekKey] = { key: r.weekKey, label: r.weekLabel || getWeekLabelFromKey(r.weekKey, r.accountType||'sports'), type: r.accountType };
-  });
-  const weeks = Object.values(weekMap).sort((a,b) => b.key.localeCompare(a.key));
-
-  sel.innerHTML = '<option value="all">全部</option>';
-  weeks.forEach(w => {
-    const typeTag = w.type==='baccarat' ? '【百家樂】' : '【體育】';
-    sel.innerHTML += `<option value="${w.key}">${w.label}</option>`;
-  });
-  if(current && current !== 'all') sel.value = current;
-}
-
-function renderRecords() {
-  populateRecordsWeekFilter();
-  const weekFilter = document.getElementById('records-week-filter').value;
-  const typeFilter = document.getElementById('records-type-filter').value;
-
-  let recs = DB.records.filter(r => {
-    if(weekFilter !== 'all' && r.weekKey !== weekFilter) return false;
-    if(typeFilter !== 'all' && r.accountType !== typeFilter) return false;
-    return true;
-  });
-
-  const container = document.getElementById('records-grouped');
-  if(!container) return;
-
-  if(!recs.length) {
-    document.getElementById('records-week-summary').innerHTML = '';
-    container.innerHTML = '<div class="card" style="text-align:center;padding:40px;color:var(--text3);">尚無記錄</div>';
-    return;
-  }
-
-  // Summary for current filter
-  const totalPnl = recs.reduce((s,r) => s+r.myPnl, 0);
-  const summEl = document.getElementById('records-week-summary');
-  if(summEl) summEl.innerHTML = `共 ${recs.length} 筆｜我的損益：<span class="mono ${totalPnl>=0?'text-green':'text-red'}" style="font-weight:700;">${fmt(totalPnl)}</span>`;
-
-  // Group by weekKey
-  const weekMap = {};
-  recs.forEach(r => {
-    if(!weekMap[r.weekKey]) weekMap[r.weekKey] = { key: r.weekKey, label: r.weekLabel || getWeekLabelFromKey(r.weekKey, r.accountType||'sports'), records: [], myPnl: 0 };
-    weekMap[r.weekKey].records.push(r);
-    weekMap[r.weekKey].myPnl += r.myPnl;
-  });
-
-  const groups = Object.values(weekMap).sort((a,b) => b.key.localeCompare(a.key));
-
-  container.innerHTML = groups.map(g => {
-    const cls = g.myPnl >= 0 ? 'text-green' : 'text-red';
-    const rows = g.records.map((r,i) => {
-      const uid = encodeURIComponent(r.createdAt || '');
-      const wlCls = r.winloss >= 0 ? 'text-red' : 'text-green';
-      const pnlCls = r.myPnl >= 0 ? 'text-green' : 'text-red';
-      const isBacc = r.accountType === 'baccarat';
-      const acc = DB.accounts.find(a => a.name === r.account) || {};
-      const rebateAmt = isBacc ? (r.flow/10000)*(acc.rebate||0) : 0;
-      const typeLabel = {sports:'體育',baccarat:'百家樂','539':'539'}[r.accountType] || r.accountType;
-      const typeCls = {sports:'badge-yellow',baccarat:'badge-blue','539':'badge-green'}[r.accountType] || 'badge-blue';
-      const typeTag = `<span class="badge ${typeCls}" style="font-size:10px;">${typeLabel}</span>`;
-      const collectAmt = r.actualCollect != null ? r.actualCollect : -r.winloss;
-      const collectCls = collectAmt >= 0 ? 'text-green' : 'text-red';
-      return `<tr>
-        <td>${typeTag} <b>${r.account}</b><br><span class="text-sm">${r.site||''}${r.customer?' ｜ 客：'+r.customer:''}</span></td>
-        <td class="mono ${wlCls}">${fmt(r.winloss)}${r.sportsRebate?'<br><span class="text-sm" style="color:var(--text3)">水:'+fmtAbs(r.sportsRebate)+'</span>':''}</td>
-        <td class="mono ${collectCls}">${fmtAbs(Math.abs(collectAmt))}</td>
-        <td class="mono" style="color:var(--text2)">${isBacc ? fmtAbs(r.flow) : '-'}</td>
-        <td class="mono" style="color:var(--text2)">${isBacc ? fmtAbs(rebateAmt) : '-'}</td>
-        <td class="mono ${pnlCls}">${fmt(r.myPnl)}</td>
-        <td>${r.note ? '<span class="text-sm">'+r.note+'</span>' : ''}</td>
-        <td style="display:flex;gap:4px;flex-wrap:wrap;">
-          <button class="btn btn-ghost btn-sm rec-edit" data-uid="${uid}">編輯</button>
-          <button class="btn btn-danger btn-sm rec-del" data-uid="${uid}">刪除</button>
-        </td>
-      </tr>`;
-    }).join('');
-
-    return `<div class="card" style="margin-bottom:14px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-        <div>
-          <b style="font-size:15px;">📅 ${g.label}</b>
-          <div class="text-sm" style="margin-top:2px;">${g.records.length} 筆記錄</div>
-        </div>
-        <div class="mono ${cls}" style="font-size:22px;font-weight:700;">${fmt(g.myPnl)}</div>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr>
-            <th>帳號/客人</th><th>輸贏（水）</th><th>實收/付</th><th>流水</th><th>退水</th><th>我的損益</th><th>備註</th><th>操作</th>
-          </tr></thead>
-          <tbody>${rows}</tbody>
-        </table>
-      </div>
-    </div>`;
-  }).join('');
-
-  // Event delegation for delete/edit buttons
-  container.onclick = function(e) {
-    const delBtn = e.target.closest('.rec-del');
-    const editBtn = e.target.closest('.rec-edit');
-    if(delBtn) {
-      const uid = decodeURIComponent(delBtn.dataset.uid);
-      const idx = DB.records.findIndex(r => r.createdAt === uid);
-      if(idx === -1) { toast('找不到記錄'); return; }
-      DB.records.splice(idx, 1);
-      save(); renderRecords(); toast('✅ 已刪除記錄');
-    }
-    if(editBtn) {
-      const uid = decodeURIComponent(editBtn.dataset.uid);
-      const idx = DB.records.findIndex(r => r.createdAt === uid);
-      if(idx === -1) { toast('找不到記錄'); return; }
-      openRecordModal(idx);
-    }
-  };
-}
-
-function deleteRecordByUid(uid) {
-  const decoded = decodeURIComponent(uid);
-  const idx = DB.records.findIndex(r => r.createdAt === decoded);
-  if(idx === -1) { toast('找不到記錄'); return; }
-  DB.records.splice(idx, 1);
-  save(); renderRecords(); toast('已刪除');
-}
-
-function editRecordByUid(uid) {
-  const decoded = decodeURIComponent(uid);
-  const idx = DB.records.findIndex(r => r.createdAt === decoded);
-  if(idx === -1) { toast('找不到記錄'); return; }
-  openRecordModal(idx);
-}
-
-// ========== SETTLEMENT ==========
-function renderSettlement() {
-  const period = document.getElementById('settle-period').value;
-
-  // Get current week's Monday key
-  const [wf] = getWeekRange();
-  const curWeekKey = getWeekKeyForRecord(wf, 'sports');
-  const [mf, mt] = getMonthRange();
-
-  const recs = DB.records.filter(r => {
-    if(period === 'all') return true;
-    if(period === 'week') return r.weekKey === curWeekKey;
-    if(period === 'month') return r.weekKey >= mf && r.weekKey <= mt;
-    return true;
-  });
-  if(!recs.length) {
-    document.getElementById('settlement-content').innerHTML='<div class="card" style="text-align:center;padding:40px;color:var(--text3)">本期無記錄</div>';
-    return;
-  }
-
-  // Aggregate per contactName
-  const personMap = {};
-  recs.forEach(r=>{
-    (r.breakdown||[]).forEach(b=>{
-      if(b.isMe) return;
-      const key = b.contactName;
-      if(!personMap[key]) personMap[key]={ name:key, total:0, details:[] };
-      personMap[key].total += b.amount;
-      personMap[key].details.push({date:r.date, account:r.account, label:b.label, amount:b.amount});
-    });
-  });
-
-  const myTotal = recs.reduce((s,r)=>s+r.myPnl,0);
-  const totalRecv = Object.values(personMap).filter(p=>p.total>=0).reduce((s,p)=>s+p.total,0);
-  const totalPay  = Object.values(personMap).filter(p=>p.total<0).reduce((s,p)=>s+Math.abs(p.total),0);
-
-  let html=`<div class="stats-row" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px;">
-    <div class="stat-card"><div class="stat-label">我的淨損益</div><div class="stat-val ${myTotal>=0?'green':'red'} mono">${fmt(myTotal)}</div></div>
-    <div class="stat-card"><div class="stat-label">應收合計（別人欠我）</div><div class="stat-val green mono">+${fmtAbs(totalRecv)}</div></div>
-    <div class="stat-card"><div class="stat-label">應付合計（我欠別人）</div><div class="stat-val red mono">-${fmtAbs(totalPay)}</div></div>
-  </div>`;
-
-  if(!Object.keys(personMap).length) {
-    html+='<div class="card" style="text-align:center;padding:30px;color:var(--text3)">無下線分成資料</div>';
-  } else {
-    html+=`<div style="display:grid;gap:12px;">`;
-    Object.values(personMap).sort((a,b)=>b.total-a.total).forEach(p=>{
-      const isRecv = p.total>=0;
-      const cls = isRecv?'badge-green':'badge-red';
-      const label = isRecv?'對方需付我':'我需付對方';
-      html+=`<div class="settle-card">
-        <div class="settle-header">
-          <span class="settle-name">${p.name}</span>
-          <span class="badge ${cls}">${label}：${fmtAbs(Math.abs(p.total))}</span>
-        </div>
-        <div class="settle-rows">`;
-      p.details.forEach(d=>{
-        html+=`<div class="settle-row"><span>${d.date}｜${d.account}｜${d.label}</span><span class="mono ${d.amount>=0?'text-green':'text-red'}">${fmt(d.amount)}</span></div>`;
-      });
-      html+=`</div><div class="settle-total">
-          <span>合計</span>
-          <span class="mono ${p.total>=0?'text-green':'text-red'}">${fmt(p.total)}</span>
-        </div>
-      </div>`;
-    });
-    html+=`</div>`;
-  }
-  document.getElementById('settlement-content').innerHTML=html;
-}
-
-// ========== DASHBOARD ==========
-function renderDashboard() {
-  document.getElementById('today-date').textContent = new Date().toLocaleDateString('zh-TW',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-  const [mf,mt]=getMonthRange();
-  const [wf,wt]=getWeekRange();
-  const curWeekKey = getWeekKeyForRecord(wf,'sports');
-  const monthRecs=DB.records.filter(r=> r.weekKey >= mf && r.weekKey <= mt);
-  const weekRecs=DB.records.filter(r=> r.weekKey === curWeekKey);
-  const monthly=monthRecs.reduce((s,r)=>s+r.myPnl,0);
-  const weekly=weekRecs.reduce((s,r)=>s+r.myPnl,0);
-
-  // Settle aggregation all time
-  const personMap={};
-  DB.records.forEach(r=>{
-    (r.breakdown||[]).forEach(b=>{
-      if(!b.isMe){
-        if(!personMap[b.contactName]) personMap[b.contactName]=0;
-        personMap[b.contactName]+=b.amount;
-      }
-    });
-  });
-  const recv=Object.values(personMap).filter(v=>v>0).reduce((s,v)=>s+v,0);
-  const pay=Object.values(personMap).filter(v=>v<0).reduce((s,v)=>s+v,0);
-
-  const mc=monthly>=0?'green':'red';
-  const wc=weekly>=0?'text-green':'text-red';
-  document.getElementById('dash-monthly').textContent=fmt(monthly);
-  document.getElementById('dash-monthly').className=`stat-val ${mc} mono`;
-  document.getElementById('dash-weekly').textContent=fmt(weekly);
-  document.getElementById('dash-weekly').className=`stat-val blue mono`;
-  document.getElementById('dash-recv').textContent=fmtAbs(recv);
-  document.getElementById('dash-pay').textContent=fmtAbs(Math.abs(pay));
-
-  // Recent
-  const recent5 = DB.records.slice(0,5);
-  if(recent5.length) {
-    document.getElementById('dash-recent-records').innerHTML=recent5.map(r=>`
-      <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;">
-        <span><b>${r.account}</b> <span style="color:var(--text3)">${r.date}</span></span>
-        <span class="mono ${r.myPnl>=0?'text-green':'text-red'}">${fmt(r.myPnl)}</span>
-      </div>`).join('');
-  }
-
-  // Pending
-  const sorted=Object.entries(personMap).sort((a,b)=>Math.abs(b[1])-Math.abs(a[1])).slice(0,5);
-  document.getElementById('dash-pending').innerHTML=sorted.length?sorted.map(([n,v])=>`
-    <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px;">
-      <span>${n}</span>
-      <span class="mono ${v>=0?'text-green':'text-red'}">${fmt(v)}</span>
-    </div>`).join(''):'<div class="text-sm" style="padding:20px 0;text-align:center;">無待結算</div>';
-}
-
-// ========== REPORT ==========
-function switchReportTab(tab, el) {
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById('report-weekly').style.display=tab==='weekly'?'':'none';
-  document.getElementById('report-monthly').style.display=tab==='monthly'?'':'none';
-}
-
-function renderReport() {
-  // Weekly: group by weekKey
-  const weekMap={};
-  DB.records.forEach(r=>{
-    const key = r.weekKey || getWeekKeyForRecord(r.date||r.weekKey, r.accountType||'sports');
-    if(!weekMap[key]) weekMap[key]={from:key, label: r.weekLabel || getWeekLabelFromKey(key, r.accountType||'sports'), records:[], myPnl:0};
-    weekMap[key].records.push(r);
-    weekMap[key].myPnl += r.myPnl;
-  });
-  const weeks=Object.values(weekMap).sort((a,b)=>b.from.localeCompare(a.from));
-
-  let whtml='';
-  if(!weeks.length) whtml='<div class="card" style="text-align:center;padding:40px;color:var(--text3)">尚無記錄</div>';
-  else weeks.forEach(w=>{
-    const cls=w.myPnl>=0?'text-green':'text-red';
-    // Calc per-person for this week
-    const wPersonMap={};
-    w.records.forEach(r=>{
-      (r.breakdown||[]).forEach(b=>{
-        if(b.isMe) return;
-        if(!wPersonMap[b.contactName]) wPersonMap[b.contactName]={name:b.contactName,total:0};
-        wPersonMap[b.contactName].total+=b.amount;
-      });
-    });
-    const personSummary = Object.values(wPersonMap);
-    whtml+=`<div class="card" style="margin-bottom:12px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-        <div><b>${w.label || getWeekLabelFromKey(w.from, 'sports')}</b><div class="text-sm">${w.records.length} 筆記錄</div></div>
-        <div class="mono ${cls}" style="font-size:20px;font-weight:700;">${fmt(w.myPnl)}</div>
-      </div>
-      ${personSummary.length?`<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
-        ${personSummary.map(p=>`<span class="badge ${p.total>=0?'badge-green':'badge-red'}">${p.name}：${fmt(p.total)}</span>`).join('')}
-      </div>`:''}
-      <div class="table-wrap"><table>
-        <thead><tr><th>日期</th><th>帳號</th><th>客人輸贏</th><th>我的損益</th></tr></thead>
-        <tbody>${w.records.map(r=>`<tr>
-          <td>${r.date}</td><td>${r.account}</td>
-          <td class="mono ${r.winloss>=0?'text-red':'text-green'}">${fmt(r.winloss)}</td>
-          <td class="mono ${r.myPnl>=0?'text-green':'text-red'}">${fmt(r.myPnl)}</td>
-        </tr>`).join('')}</tbody>
-      </table></div></div>`;
-  });
-  document.getElementById('report-weekly').innerHTML=whtml;
-
-  // Monthly
-  const monthMap={};
-  DB.records.forEach(r=>{
-    const key=(r.weekKey||r.date||'1970-01').slice(0,7);
-    if(!monthMap[key]) monthMap[key]={month:key,records:[],myPnl:0};
-    monthMap[key].records.push(r); monthMap[key].myPnl+=r.myPnl;
-  });
-  const months=Object.values(monthMap).sort((a,b)=>b.month.localeCompare(a.month));
-
-  let mhtml='';
-  if(!months.length) mhtml='<div class="card" style="text-align:center;padding:40px;color:var(--text3)">尚無記錄</div>';
-  else months.forEach(m=>{
-    const cls=m.myPnl>=0?'text-green':'text-red';
-    // month return
-    const accsInMonth=[...new Set(m.records.map(r=>r.account))];
-    let monthRetTotal=0;
-    let monthRetDetails=[];
-    accsInMonth.forEach(an=>{
-      const a=DB.accounts.find(ac=>ac.name===an);
-      if(!a) return;
-      const recsByAcc=m.records.filter(r=>r.account===an);
-
-      // 交收對象月退：交收對象這個月有獲利（欠我的為正），按月退%退給我
-      if(a.counterparty && a.monthlyRet>0) {
-        const cpPnl = recsByAcc.reduce((s,r)=>{
-          const b=(r.breakdown||[]).find(b=>b.contactName===a.counterparty&&b.isCounterparty);
-          return s+(b?b.amount:0);
-        },0);
-        if(cpPnl>0) {
-          const retAmt=cpPnl*(a.monthlyRet/100);
-          monthRetTotal+=retAmt;
-          monthRetDetails.push({acc:an, who:a.counterparty, pct:a.monthlyRet, amt:retAmt, dir:`${a.counterparty}月退給我`});
-        }
-      }
-
-      // 下線月退：下線這個月有獲利（欠我為正），按月退%退給我
-      (a.shares||[]).forEach(sh=>{
-        if(sh.monthlyRet<=0) return;
-        const shPnl = recsByAcc.reduce((s,r)=>{
-          const b=(r.breakdown||[]).find(b=>b.contactName===sh.name&&b.isShare);
-          return s+(b?b.amount:0);
-        },0);
-        if(shPnl>0) {
-          const retAmt=shPnl*(sh.monthlyRet/100);
-          monthRetDetails.push({acc:an, who:sh.name, pct:sh.monthlyRet, amt:retAmt, dir:`${sh.name}月退給我`});
-        }
-      });
-
-      // 我的月退（我這個帳獲利，退給交收對象或上線）
-      const myPnl=recsByAcc.reduce((s,r)=>s+r.myPnl,0);
-      if(a.upline && a.monthlyRet>0 && !a.counterparty && myPnl>0) {
-        const retAmt=myPnl*(a.monthlyRet/100);
-        monthRetTotal-=retAmt;
-        monthRetDetails.push({acc:an, who:a.upline, pct:a.monthlyRet, amt:retAmt, dir:'我月退給上線'});
-      }
-    });
-    const incomingRet = monthRetDetails.filter(d=>d.dir&&d.dir.includes('給我')).reduce((s,d)=>s+d.amt,0);
-    const outgoingRet = monthRetDetails.filter(d=>!d.dir||!d.dir.includes('給我')).reduce((s,d)=>s+d.amt,0);
-    const netAfterRet = m.myPnl - outgoingRet + incomingRet;
-    mhtml+=`<div class="card" style="margin-bottom:12px;">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">
-        <div><b style="font-size:16px;">${m.month}</b><div class="text-sm">${m.records.length} 筆記錄</div></div>
-        <div class="mono ${cls}" style="font-size:22px;font-weight:700;">${fmt(m.myPnl)}</div>
-      </div>
-      ${monthRetTotal>0?`
-        <div class="summary-box" style="margin-bottom:12px;background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.2);">
-          <div class="label" style="color:var(--yellow);">月獲利退給上線明細</div>
-          ${monthRetDetails.map(d=>`
-            <div style="display:flex;justify-content:space-between;font-size:12px;margin-top:6px;color:var(--text2);">
-              <span>${d.acc}｜${d.dir} (${d.pct}%)</span>
-              <span class="mono ${d.dir.includes('給我')?'text-green':'text-red'}">${d.dir.includes('給我')?'+':'-'}${fmtAbs(d.amt)}</span>
-            </div>`).join('')}
-          <div style="display:flex;justify-content:space-between;margin-top:8px;padding-top:8px;border-top:1px solid rgba(251,191,36,.2);font-weight:700;font-size:14px;">
-            <span style="color:var(--text);">退上線合計</span><span class="mono text-red">-${fmtAbs(monthRetTotal)}</span>
-          </div>
-          <div style="display:flex;justify-content:space-between;margin-top:4px;font-weight:700;font-size:15px;">
-            <span style="color:var(--text);">實際淨利</span><span class="mono ${netAfterRet>=0?'text-green':'text-red'}">${fmt(netAfterRet)}</span>
-          </div>
-        </div>`:''}
-
-      <div class="table-wrap"><table>
-        <thead><tr><th>帳號</th><th>筆數</th><th>總損益</th></tr></thead>
-        <tbody>${accsInMonth.map(an=>{
-          const recs=m.records.filter(r=>r.account===an);
-          const pnl=recs.reduce((s,r)=>s+r.myPnl,0);
-          return `<tr><td>${an}</td><td>${recs.length}</td><td class="mono ${pnl>=0?'text-green':'text-red'}">${fmt(pnl)}</td></tr>`;
-        }).join('')}</tbody>
-      </table></div></div>`;
-  });
-  document.getElementById('report-monthly').innerHTML=mhtml;
-}
-
-// ========== STATEMENT ==========
-function renderStatementSetup() {
-  const sel = document.getElementById('stmt-contact');
-  sel.innerHTML = '<option value="">-- 選擇對象 --</option>';
-  DB.contacts.forEach(c => sel.innerHTML += `<option value="${c.name}">${c.name}</option>`);
-
-  const weekSel = document.getElementById('stmt-week');
-  if(weekSel) {
-    weekSel.innerHTML = '<option value="all">全部（不限週期）</option>';
-    // Gather all unique weeks from records
-    const weekMap = {};
-    DB.records.forEach(r => {
-      if(!weekMap[r.weekKey]) weekMap[r.weekKey] = { key: r.weekKey, label: r.weekLabel || getWeekLabelFromKey(r.weekKey, r.accountType||'sports') };
-    });
-    Object.values(weekMap).sort((a,b)=>b.key.localeCompare(a.key)).forEach(w => {
-      weekSel.innerHTML += `<option value="${w.key}">${w.label}</option>`;
-    });
-  }
-}
-
-function onWeekSelect() {
-  // no date pickers needed anymore - week select drives everything
-}
-
-function renderStatement() {
-  const person = document.getElementById('stmt-contact').value;
-  const weekFilter = document.getElementById('stmt-week').value;
-  if(!person) { toast('請選擇對象'); return; }
-
-  const matchingRecs = DB.records.filter(r => weekFilter === 'all' || r.weekKey === weekFilter);
-
-  const rows = [];
-  matchingRecs.forEach(r => {
-    // 在 breakdown 裡找（下線/我自己）
-    let found = false;
-    (r.breakdown || []).forEach(b => {
-      if(b.contactName === person) {
-        found = true;
-        rows.push({
-          weekKey: r.weekKey,
-          weekLabel: r.weekLabel || getWeekLabelFromKey(r.weekKey, r.accountType||'sports'),
-          account: r.account,
-          accountType: r.accountType,
-          winloss: r.winloss,
-          sportsRebate: r.sportsRebate || 0,
-          flow: r.flow || 0,
-          customer: r.customer || '',
-          label: b.label,
-          amount: b.amount,
-          isBreakdown: true,
-        });
-      }
-    });
-    // 客人角色：在 r.customer 裡找，顯示「我跟他收/付」的金額
-    if(!found && r.customer === person) {
-      const actualCollect = -r.winloss; // 正=我收，負=我付
-      rows.push({
-        weekKey: r.weekKey,
-        weekLabel: r.weekLabel || getWeekLabelFromKey(r.weekKey, r.accountType||'sports'),
-        account: r.account,
-        accountType: r.accountType,
-        winloss: r.winloss,
-        sportsRebate: r.sportsRebate || 0,
-        flow: r.flow || 0,
-        customer: person,
-        label: `客人帳（${actualCollect>=0?'應收':'應付'}）`,
-        amount: actualCollect,
-        isCustomer: true,
-      });
-    }
-  });
-
-  const outEl = document.getElementById('statement-output');
-  if(!rows.length) {
-    outEl.innerHTML = `<div class="card" style="text-align:center;padding:40px;">
-      <div style="font-size:32px;margin-bottom:12px;">🔍</div>
-      <div style="color:var(--text2);margin-bottom:6px;">找不到「${person}」的相關記錄</div>
-      <div class="text-sm">如是下線/上線，請確認帳號分成有加入此人；如是客人，請確認記錄中有選擇此客人</div>
-    </div>`;
-    return;
-  }
-
-  const total = rows.reduce((s,r) => s+r.amount, 0);
-  const totalCls = total >= 0 ? 'text-green' : 'text-red';
-  const totalLabel = total >= 0 ? '對方需付我' : '我需付對方';
-
-  // Group by weekKey
-  const byWeek = {};
-  rows.forEach(r => {
-    if(!byWeek[r.weekKey]) byWeek[r.weekKey] = { label: r.weekLabel, rows: [], subtotal: 0 };
-    byWeek[r.weekKey].rows.push(r);
-    byWeek[r.weekKey].subtotal += r.amount;
-  });
-
-  let weekHtml = '';
-  Object.keys(byWeek).sort().reverse().forEach(wk => {
-    const w = byWeek[wk];
-    weekHtml += `
-      <div style="margin-bottom:16px;">
-        <div style="font-size:12px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;padding:6px 10px;background:var(--surface2);border-radius:6px;">
-          📅 ${w.label}
-        </div>
-        ${w.rows.map(r => {
-          const amtCls = r.amount>=0?'text-green':'text-red';
-          const srInfo = r.sportsRebate>0 ? `，水${fmtAbs(r.sportsRebate)}` : '';
-          const flowInfo = r.flow>0 ? `，流水${fmtAbs(r.flow)}` : '';
-          const tag = r.isCustomer ? '<span style="background:rgba(34,211,238,.15);color:var(--accent2);font-size:10px;padding:1px 5px;border-radius:3px;margin-right:4px;">客人</span>' : '';
-          return `<div style="display:grid;grid-template-columns:1fr auto;gap:8px;padding:8px 10px;border-bottom:1px solid var(--border);font-size:13px;">
-            <span>
-              ${tag}<b>${r.account}</b>
-              <span style="color:var(--text3);font-size:11px;"> — ${r.label}</span>
-              <span style="color:var(--text3);font-size:11px;">｜輸贏${fmt(r.winloss)}${srInfo}${flowInfo}</span>
-            </span>
-            <span class="mono ${amtCls}" style="font-weight:600;white-space:nowrap;">${fmt(r.amount)}</span>
-          </div>`;
-        }).join('')}
-        <div style="display:flex;justify-content:flex-end;padding:8px 10px;font-size:13px;font-weight:700;">
-          <span>週小計：<span class="mono ${w.subtotal>=0?'text-green':'text-red'}">${fmt(w.subtotal)}</span></span>
-        </div>
-      </div>`;
-  });
-
-  const weekRange = weekFilter === 'all' ? '全部期間' : (byWeek[Object.keys(byWeek)[0]]?.label || '');
-  outEl.innerHTML = `<div class="card" id="stmt-print">
-    <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border);">
-      <div>
-        <div style="font-size:20px;font-weight:700;">對帳明細單</div>
-        <div class="text-sm" style="margin-top:4px;">對象：<b>${person}</b></div>
-        <div class="text-sm">產生時間：${new Date().toLocaleString('zh-TW')}</div>
-      </div>
-      <div style="text-align:right;">
-        <div class="text-sm">${totalLabel}</div>
-        <div class="mono ${totalCls}" style="font-size:28px;font-weight:900;">${fmtAbs(Math.abs(total))}</div>
-      </div>
-    </div>
-    ${weekHtml}
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;padding-top:16px;border-top:2px solid var(--border);">
-      <span style="font-size:15px;font-weight:700;">總計</span>
-      <div style="text-align:right;">
-        <div class="text-sm">${totalLabel}</div>
-        <div class="mono ${totalCls}" style="font-size:24px;font-weight:900;">${fmtAbs(Math.abs(total))}</div>
-      </div>
-    </div>
-  </div>`;
-}
-
-function printStatement() {
-  const el=document.getElementById('stmt-print');
-  if(!el) { toast('請先產生明細'); return; }
-  const w=window.open('','_blank');
-  w.document.write(`<html><head><title>對帳明細</title>
-    <style>
-      body{font-family:sans-serif;font-size:14px;padding:30px;color:#000;}
-      table{width:100%;border-collapse:collapse;margin-top:16px;}
-      th,td{border:1px solid #ccc;padding:8px 12px;text-align:left;}
-      th{background:#f0f0f0;font-weight:600;}
-      .green{color:#16a34a;} .red{color:#dc2626;}
-      h2{margin-bottom:4px;} .sub{color:#666;margin-bottom:16px;}
-      .total{margin-top:16px;text-align:right;font-size:18px;font-weight:700;}
-    </style></head><body>
-    ${el.innerHTML}</body></html>`);
-  w.document.close(); w.print();
-}
-
-// ========== API HELPERS ==========
-function getToken() { return localStorage.getItem('ball_token') || ''; }
-function authHeaders() {
-  return { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() };
-}
-
-let _saveTimer = null;
-function _apiSave() {
-  clearTimeout(_saveTimer);
-  _saveTimer = setTimeout(async () => {
-    try {
-      await fetch('/api/data', {method:'POST', headers: authHeaders(), body:JSON.stringify({data:DB})});
-    } catch(e) { console.warn('Auto-save failed', e); }
-  }, 800);
-}
-
-async function apiGet(url) {
-  const r = await fetch(url, { headers: authHeaders() });
-  if(r.status === 401) { showLogin(); throw new Error('Unauthorized'); }
-  return r.json();
-}
-async function apiPost(url, body) {
-  const r = await fetch(url, {method:'POST', headers: authHeaders(), body:JSON.stringify(body)});
-  if(r.status === 401) { showLogin(); throw new Error('Unauthorized'); }
-  return r.json();
-}
-async function apiDelete(url) {
-  const r = await fetch(url, {method:'DELETE', headers: authHeaders()});
-  return r.json();
-}
-
-function showLogin() {
-  document.getElementById('pw-overlay').style.display = 'flex';
-}
-
-async function doLogin() {
-  const username = document.getElementById('login-username').value.trim();
-  const password = document.getElementById('login-password').value;
-  const errEl = document.getElementById('pw-error');
-  if(!username || !password) { errEl.textContent = '請填寫帳號和密碼'; return; }
-  try {
-    const r = await fetch('/api/login', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username,password})});
-    const d = await r.json();
-    if(d.ok) {
-      localStorage.setItem('ball_token', d.token);
-      document.getElementById('pw-overlay').style.display = 'none';
-      await loadFromServer();
-      renderDashboard(); renderAccounts(); renderContacts(); renderRecords();
-      toast('✅ 歡迎，' + d.username);
-    } else {
-      errEl.textContent = d.error || '登入失敗';
-    }
-  } catch(e) { errEl.textContent = '連線錯誤'; }
-}
-
-async function doRegister() {
-  const username = document.getElementById('login-username').value.trim();
-  const password = document.getElementById('login-password').value;
-  const errEl = document.getElementById('pw-error');
-  if(!username || !password) { errEl.textContent = '請填寫帳號和密碼'; return; }
-  try {
-    const r = await fetch('/api/register', {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username,password})});
-    const d = await r.json();
-    if(d.ok) { errEl.style.color='var(--accent)'; errEl.textContent='帳號建立成功，請重新登入'; document.getElementById('register-section').style.display='none'; }
-    else errEl.textContent = d.error;
-  } catch(e) { errEl.textContent = '連線錯誤'; }
-}
-
-async function loadFromServer() {
-  try {
-    const r = await fetch('/api/data', { headers: authHeaders() });
-    if(r.status === 401) { showLogin(); return; }
-    const data = await r.json();
-    if(data.data) {
-      DB = data.data;
-      if(!DB.contacts) DB.contacts = [];
-      if(!DB.accounts) DB.accounts = [];
-      if(!DB.records) DB.records = [];
-      if(!DB._editAccountIdx) DB._editAccountIdx = -1;
-      if(!DB._editRecordIdx) DB._editRecordIdx = -1;
-    }
-  } catch(e) { console.error('loadFromServer failed', e); }
-}
-
-async function exportData() { window.location.href = '/api/export'; }
-
-async function importData(file) {
-  const reader = new FileReader();
-  reader.onload = async e => {
-    try {
-      const all = JSON.parse(e.target.result);
-      const r = await apiPost('/api/import', all);
-      if(r.ok) {
-        await loadFromServer();
-        renderDashboard(); renderAccounts(); renderContacts(); renderRecords();
-        toast('✅ 匯入成功');
-      }
-    } catch { toast('❌ 匯入失敗'); }
-  };
-  reader.readAsText(file);
-}
-
-async function renderPwList() {
-  const el = document.getElementById('pwm-list');
-  el.innerHTML = '<div style="text-align:center;color:var(--text3);padding:16px;font-size:13px;">載入中...</div>';
-  try {
-    const entries = await apiGet('/api/passwords');
-    if(!entries.length) { el.innerHTML = '<div style="text-align:center;color:var(--text3);padding:20px;font-size:13px;">尚無記錄</div>'; return; }
-    el.innerHTML = entries.map(e => `
-      <div style="background:var(--surface2);border-radius:8px;padding:10px 12px;margin-bottom:8px;">
-        <div style="display:flex;justify-content:space-between;align-items:start;">
-          <div>
-            <div style="font-weight:700;font-size:14px;">${e.site}</div>
-            <div style="font-size:13px;color:var(--text2);">帳號：${e.account}</div>
-            <div style="font-size:13px;color:var(--text2);display:flex;align-items:center;gap:6px;">
-              密碼：<span id="pwm-pw-${e.id}" style="letter-spacing:3px;">••••••</span>
-              <button class="btn btn-ghost btn-sm" style="padding:2px 8px;font-size:11px;" onclick="togglePw('${e.id}','${e.password}')">顯示</button>
-            </div>
-            ${e.note ? `<div style="font-size:12px;color:var(--text3);margin-top:2px;">${e.note}</div>` : ''}
-          </div>
-          <button class="btn btn-danger btn-sm" onclick="deletePwEntry(${e.id})">刪除</button>
-        </div>
-      </div>`).join('');
-  } catch { el.innerHTML = '<div style="color:var(--red);padding:12px;">載入失敗</div>'; }
-}
-
-function togglePw(id, pw) {
-  const el = document.getElementById('pwm-pw-'+id);
-  el.textContent = el.textContent === '••••••' ? pw : '••••••';
-  el.style.letterSpacing = el.textContent === '••••••' ? '3px' : 'normal';
-}
-
-async function savePwEntry() {
-  const site = document.getElementById('pwm-site').value.trim();
-  const account = document.getElementById('pwm-account').value.trim();
-  const password = document.getElementById('pwm-password').value.trim();
-  if(!site || !account || !password) { toast('請填寫網站、帳號、密碼'); return; }
-  await apiPost('/api/passwords', {site, account, password, note: document.getElementById('pwm-note').value.trim()});
-  document.getElementById('pwm-site').value = '';
-  document.getElementById('pwm-account').value = '';
-  document.getElementById('pwm-password').value = '';
-  document.getElementById('pwm-note').value = '';
-  renderPwList();
-  toast('✅ 已儲存');
-}
-
-async function deletePwEntry(id) {
-  await apiDelete('/api/passwords/' + id);
-  renderPwList();
-  toast('已刪除');
-}
-
-async function changeSystemPw() {
-  const oldPassword = document.getElementById('pwm-change-old').value;
-  const newPassword = document.getElementById('pwm-change-new').value.trim();
-  const msg = document.getElementById('pwm-change-msg');
-  const r = await apiPost('/api/change-password', {oldPassword, newPassword});
-  if(r.ok) { msg.style.color='var(--accent)'; msg.textContent='✅ 密碼已更新'; }
-  else { msg.style.color='var(--red)'; msg.textContent = r.error; }
-  setTimeout(() => msg.textContent = '', 2500);
-}
-
-function doLogout() {
-  localStorage.removeItem('ball_token');
-  window.location.reload();
-}
-
-// ========== INIT ==========
-document.getElementById('today-date').textContent = new Date().toLocaleDateString('zh-TW',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-
-(async () => {
-  try {
-    const me = await fetch('/api/me', { headers: authHeaders() });
-    if(me.ok) {
-      await loadFromServer();
-      document.getElementById('pw-overlay').style.display = 'none';
-      renderDashboard(); renderAccounts(); renderContacts(); renderRecords();
-    } else {
-      // Check if first-time (no users) - use a dedicated check endpoint
-      try {
-        const regTest = await fetch('/api/check-init');
-        const regData = await regTest.json();
-        if(!regData.initialized) {
-          document.getElementById('register-section').style.display = 'block';
-          document.getElementById('login-subtitle').textContent = '首次使用，請建立管理員帳號';
-        }
-      } catch(e) {}
-      showLogin();
-    }
-  } catch(e) { showLogin(); }
-})();
-</script>
-<!-- Bottom nav (mobile only) -->
-<div class="bottom-nav" id="bottom-nav">
-  <div class="bottom-nav-item active" onclick="goPage('dashboard')" data-page="dashboard">
-    <span class="bn-icon">📊</span><span>總覽</span>
-  </div>
-  <div class="bottom-nav-item" onclick="goPage('accounts')" data-page="accounts">
-    <span class="bn-icon">🏦</span><span>帳號</span>
-  </div>
-  <div class="bottom-nav-item" onclick="goPage('records')" data-page="records">
-    <span class="bn-icon">📝</span><span>記錄</span>
-  </div>
-  <div class="bottom-nav-item" onclick="goPage('settlement')" data-page="settlement">
-    <span class="bn-icon">💰</span><span>結算</span>
-  </div>
-  <div class="bottom-nav-item" onclick="showMoreMenu()" id="bn-more">
-    <span class="bn-icon">☰</span><span>更多</span>
-  </div>
-</div>
-
-<!-- More menu popup -->
-<div id="more-menu" style="display:none;position:fixed;bottom:70px;right:10px;z-index:300;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:8px;min-width:160px;box-shadow:0 8px 24px rgba(0,0,0,.4);">
-  <div class="nav-item" onclick="goPage('contacts');hideMoreMenu()"><span class="nav-icon">👥</span><span>聯絡人</span></div>
-  <div class="nav-item" onclick="goPage('report');hideMoreMenu()"><span class="nav-icon">📈</span><span>報表</span></div>
-  <div class="nav-item" onclick="goPage('statement');hideMoreMenu()"><span class="nav-icon">🧾</span><span>對帳明細</span></div>
-  <div class="nav-item" onclick="showPwManager();hideMoreMenu()"><span class="nav-icon">🔐</span><span>帳密管理</span></div>
-  <div class="nav-item" onclick="exportData();hideMoreMenu()"><span class="nav-icon">📤</span><span>匯出備份</span></div>
-  <div class="nav-item" onclick="document.getElementById('import-file').click();hideMoreMenu()"><span class="nav-icon">📥</span><span>匯入備份</span></div>
-  <div class="nav-item" onclick="doLogout()" style="color:var(--red)"><span class="nav-icon">🚪</span><span>登出</span></div>
-</div>
-<input type="file" id="import-file" accept=".json" style="display:none" onchange="importData(this.files[0])">
-
-<!-- Password Manager Modal -->
+<!-- PW Manager Modal -->
 <div class="overlay" id="modal-pwmanager">
   <div class="modal">
     <div class="modal-title">🔐 帳密管理</div>
     <div style="margin-bottom:16px;">
-      <div style="display:flex;gap:8px;margin-bottom:12px;">
-        <input id="pwm-site" placeholder="網站/平台名稱" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:9px 12px;font-size:13px;outline:none;">
-        <input id="pwm-account" placeholder="帳號" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:9px 12px;font-size:13px;outline:none;">
+      <div class="form-grid form-grid-2 mb-12">
+        <div class="form-group"><label>網站/平台</label><input id="pwm-site" placeholder="名稱"></div>
+        <div class="form-group"><label>帳號</label><input id="pwm-account" placeholder="帳號"></div>
       </div>
-      <div style="display:flex;gap:8px;margin-bottom:12px;">
-        <input id="pwm-password" placeholder="密碼" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:9px 12px;font-size:13px;outline:none;">
-        <input id="pwm-note" placeholder="備註（選填）" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:9px 12px;font-size:13px;outline:none;">
+      <div class="form-grid form-grid-2 mb-12">
+        <div class="form-group"><label>密碼</label><input id="pwm-password" placeholder="密碼"></div>
+        <div class="form-group"><label>備註</label><input id="pwm-note" placeholder="選填"></div>
       </div>
       <button class="btn btn-primary" style="width:100%;" onclick="savePwEntry()">＋ 新增</button>
     </div>
-    <div id="pwm-list" style="max-height:320px;overflow-y:auto;"></div>
-    <div style="border-top:1px solid var(--border);padding-top:14px;margin-top:8px;">
-      <div style="font-size:12px;color:var(--text3);margin-bottom:8px;">🔑 修改系統登入密碼</div>
-      <div style="display:flex;gap:8px;">
-        <input type="password" id="pwm-change-old" placeholder="舊密碼" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:8px;font-size:13px;outline:none;">
-        <input type="password" id="pwm-change-new" placeholder="新密碼" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:8px;font-size:13px;outline:none;">
-        <button class="btn btn-primary btn-sm" onclick="changeSystemPw()">更改</button>
-      </div>
-      <div id="pwm-change-msg" style="font-size:12px;margin-top:6px;min-height:16px;"></div>
+    <div id="pwm-list" style="max-height:300px;overflow-y:auto;"></div>
+    <hr class="divider">
+    <div style="font-size:12px;color:var(--text3);margin-bottom:8px;">🔑 修改系統登入密碼</div>
+    <div style="display:flex;gap:8px;">
+      <input type="password" id="pwm-change-old" placeholder="舊密碼" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:8px;font-size:13px;outline:none;">
+      <input type="password" id="pwm-change-new" placeholder="新密碼" style="flex:1;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:8px;font-size:13px;outline:none;">
+      <button class="btn btn-primary btn-sm" onclick="changeSystemPw()">更改</button>
     </div>
-    <div class="modal-actions">
-      <button class="btn btn-ghost" onclick="closeModal('modal-pwmanager')">關閉</button>
-    </div>
+    <div id="pwm-change-msg" style="font-size:12px;margin-top:6px;min-height:16px;"></div>
+    <div class="modal-actions"><button class="btn btn-ghost" onclick="closeModal('modal-pwmanager')">關閉</button></div>
   </div>
 </div>
 
+<div class="toast" id="toast-el"></div>
+
+<script>
+// ═══════════════════════════ DATA ═══════════════════════════
+let DB = { contacts:[], accounts:[], records:[] };
+let _editAccountId = null, _editRecordId = null, _editContactId = null, _accShares = [];
+
+// ═══════════════════════════ UTILS ═══════════════════════════
+const uid = () => Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const fmt = n => (n>=0?'+':'')+Math.round(n).toLocaleString();
+const fmtAbs = n => Math.abs(Math.round(n)).toLocaleString();
+function toast(msg) { const el=document.getElementById('toast-el'); el.textContent=msg; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),2500); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function calcWater(turnover, waterNum) { return (!waterNum||waterNum<=0) ? 0 : turnover/10000*waterNum; }
+
+// Week: Monday-based
+function getWeekLabel(date) {
+  const d=new Date(date); const day=d.getDay(); const diff=d.getDate()-day+(day===0?-6:1);
+  const mon=new Date(d.setDate(diff));
+  return `${mon.getFullYear()}-${String(mon.getMonth()+1).padStart(2,'0')}-${String(mon.getDate()).padStart(2,'0')}`;
+}
+function getWeekDisplay(wl) { const d=new Date(wl); const s=new Date(d); s.setDate(d.getDate()+6); return `${d.getMonth()+1}/${d.getDate()} ~ ${s.getMonth()+1}/${s.getDate()}`; }
+function getCurrentWeek() { return getWeekLabel(new Date()); }
+function getMonthLabel(date) { const d=new Date(date); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; }
+
+// ═══════════════════════════ NAV ═══════════════════════════
+function goPage(name) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const el=document.getElementById('page-'+name); if(el) el.classList.add('active');
+  document.querySelectorAll('.sidebar .nav-item').forEach(n=>n.classList.toggle('active',n.dataset.nav===name));
+  document.querySelectorAll('.bottom-nav-item').forEach(n=>n.classList.toggle('active',n.dataset.page===name));
+  const renderers={dashboard:renderDashboard,accounts:renderAccounts,contacts:renderContacts,records:renderRecords,settlement:renderSettlement,monthly:renderMonthly,verify:renderVerify};
+  if(renderers[name]) renderers[name]();
+}
+function showMoreMenu() { const m=document.getElementById('more-menu'); m.style.display=m.style.display==='block'?'none':'block'; }
+function hideMoreMenu() { document.getElementById('more-menu').style.display='none'; }
+document.addEventListener('click',e=>{ if(!e.target.closest('#more-menu')&&!e.target.closest('#bn-more')) hideMoreMenu(); });
+
+// ═══════════════════════════ CONTACTS ═══════════════════════════
+function openContactModal(id) {
+  _editContactId=id||null; const ct=id?DB.contacts.find(c=>c.id===id):null;
+  document.getElementById('ct-name').value=ct?ct.name:'';
+  document.getElementById('ct-note').value=ct?ct.note||'':'';
+  openModal('modal-contact');
+}
+function saveContact() {
+  const name=document.getElementById('ct-name').value.trim();
+  if(!name){toast('請填寫名稱');return;}
+  if(_editContactId){const ct=DB.contacts.find(c=>c.id===_editContactId);if(ct){ct.name=name;ct.note=document.getElementById('ct-note').value.trim();}}
+  else DB.contacts.push({id:uid(),name,note:document.getElementById('ct-note').value.trim()});
+  save();closeModal('modal-contact');renderContacts();toast('✅ 已儲存');
+}
+function deleteContact(id){if(!confirm('確定刪除？'))return;DB.contacts=DB.contacts.filter(c=>c.id!==id);save();renderContacts();toast('已刪除');}
+function renderContacts() {
+  const el=document.getElementById('contacts-list');
+  if(!DB.contacts.length){el.innerHTML='<div class="empty-state">尚無聯絡人</div>';return;}
+  el.innerHTML=`<div class="card"><div class="table-wrap"><table><thead><tr><th>名稱</th><th>備註</th><th style="width:100px;"></th></tr></thead><tbody>${DB.contacts.map(c=>`<tr><td style="font-weight:600;">${c.name}</td><td style="color:var(--text3);">${c.note||'-'}</td><td><div class="btn-row"><button class="btn btn-ghost btn-xs" onclick="openContactModal('${c.id}')">編輯</button><button class="btn btn-danger btn-xs" onclick="deleteContact('${c.id}')">刪除</button></div></td></tr>`).join('')}</tbody></table></div></div>`;
+}
+
+// ═══════════════════════════ ACCOUNTS ═══════════════════════════
+function openAccountModal(id) {
+  _editAccountId=id||null; const acc=id?DB.accounts.find(a=>a.id===id):null;
+  document.getElementById('acc-name').value=acc?acc.name:'';
+  document.getElementById('acc-role').value=acc?acc.role:'middle';
+  document.getElementById('acc-upper-name').value=acc&&acc.upper?acc.upper.name:'';
+  document.getElementById('acc-upper-pct').value=acc&&acc.upper?acc.upper.pct:'';
+  document.getElementById('acc-upper-water').value=acc&&acc.upper?acc.upper.water:'';
+  document.getElementById('acc-backend-pct').value=acc?(acc.backendPct!=null?acc.backendPct:5.5):5.5;
+  document.getElementById('acc-base-water').value=acc?(acc.baseWater||100):100;
+  _accShares=acc&&acc.shares?JSON.parse(JSON.stringify(acc.shares)):[];
+  onAccRoleChange();renderAccShares();checkAccPct();openModal('modal-account');
+}
+function onAccRoleChange(){document.getElementById('acc-upper-section').style.display=document.getElementById('acc-role').value==='middle'?'block':'none';checkAccPct();}
+function addAccShare(){_accShares.push({name:'',pct:0,water:0});renderAccShares();}
+function removeAccShare(i){_accShares.splice(i,1);renderAccShares();checkAccPct();}
+function renderAccShares() {
+  document.getElementById('acc-shares').innerHTML=_accShares.map((s,i)=>`<div class="share-row">
+    <input placeholder="名稱" value="${s.name}" onchange="_accShares[${i}].name=this.value" style="text-align:left;">
+    <input type="number" placeholder="佔%" value="${s.pct||''}" min="0" max="100" onchange="_accShares[${i}].pct=parseFloat(this.value)||0;checkAccPct()" style="font-family:'JetBrains Mono',monospace;">
+    <input type="number" placeholder="水數" value="${s.water||''}" min="0" onchange="_accShares[${i}].water=parseFloat(this.value)||0" style="font-family:'JetBrains Mono',monospace;">
+    <button class="icon-btn" onclick="removeAccShare(${i})" title="刪除">✕</button>
+  </div>`).join('');
+}
+function checkAccPct() {
+  const role=document.getElementById('acc-role').value;
+  const up=role==='middle'?(parseFloat(document.getElementById('acc-upper-pct').value)||0):0;
+  const sp=_accShares.reduce((s,x)=>s+(x.pct||0),0);
+  const total=up+sp; const el=document.getElementById('acc-pct-check'); el.style.display='flex';
+  if(Math.abs(total-100)<0.01){el.className='verify-row verify-ok';el.innerHTML=`✅ 比例合計 ${total}%（正確）`;}
+  else{el.className='verify-row verify-err';el.innerHTML=`⚠️ 比例合計 ${total}%（上家${up}% + 股東${sp}%）— 應為 100%`;}
+}
+function saveAccount() {
+  const name=document.getElementById('acc-name').value.trim();
+  if(!name){toast('請填寫帳號名稱');return;}
+  const role=document.getElementById('acc-role').value;
+  const acc={id:_editAccountId||uid(),name,role,
+    upper:role==='middle'?{name:document.getElementById('acc-upper-name').value.trim(),pct:parseFloat(document.getElementById('acc-upper-pct').value)||0,water:parseFloat(document.getElementById('acc-upper-water').value)||0}:null,
+    shares:_accShares.filter(s=>s.name.trim()),
+    backendPct:parseFloat(document.getElementById('acc-backend-pct').value)||0,
+    baseWater:parseFloat(document.getElementById('acc-base-water').value)||100};
+  if(_editAccountId){const i=DB.accounts.findIndex(a=>a.id===_editAccountId);if(i>=0)DB.accounts[i]=acc;}else DB.accounts.push(acc);
+  save();closeModal('modal-account');renderAccounts();toast('✅ 已儲存');
+}
+function deleteAccount(id){if(!confirm('確定刪除？'))return;DB.accounts=DB.accounts.filter(a=>a.id!==id);save();renderAccounts();toast('已刪除');}
+function renderAccounts() {
+  const el=document.getElementById('accounts-list');
+  if(!DB.accounts.length){el.innerHTML='<div class="empty-state">尚無帳號，點擊上方按鈕新增</div>';return;}
+  el.innerHTML=DB.accounts.map(acc=>{
+    const role=acc.role==='middle'?'<span class="badge badge-blue">中間人</span>':'<span class="badge badge-yellow">莊家</span>';
+    const up=acc.upper?`<div class="text-sm mt-8">▲ 上家：<strong>${acc.upper.name||'未設定'}</strong>（${acc.upper.pct}%，水 ${acc.upper.water}）</div>`:'';
+    const sh=(acc.shares||[]).map(s=>`<span class="badge badge-green" style="margin:2px;">${s.name} ${s.pct}% 水${s.water}</span>`).join(' ');
+    const myPct=100-(acc.upper?acc.upper.pct:0)-(acc.shares||[]).reduce((s,x)=>s+x.pct,0);
+    return `<div class="card mb-12"><div class="flex-between" style="flex-wrap:wrap;gap:8px;">
+      <div><div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap;"><span style="font-weight:700;font-size:15px;">${acc.name}</span> ${role} <span class="badge badge-yellow" style="font-size:10px;">後統${acc.backendPct||5.5}% 基準水${acc.baseWater||100}</span> <span class="text-sm">我佔 ${myPct}%</span></div>
+      ${up}<div style="margin-top:4px;">▼ ${sh||'<span class="text-sm">尚無股東</span>'}</div></div>
+      <div class="btn-row"><button class="btn btn-ghost btn-sm" onclick="openAccountModal('${acc.id}')">編輯</button><button class="btn btn-danger btn-sm" onclick="deleteAccount('${acc.id}')">刪除</button></div>
+    </div></div>`;
+  }).join('');
+}
+
+// ═══════════════════════════ CORE CALC ═══════════════════════════
+function calcRecord(acc, result, turnover) {
+  // (輸贏 + 該人的水) × 該人的比例
+  let upper=null;
+  if(acc.role==='middle'&&acc.upper){
+    const water=calcWater(turnover,acc.upper.water);
+    const amount=(result+water)*(acc.upper.pct/100);
+    upper={name:acc.upper.name||'上家',pct:acc.upper.pct,water,amount,waterNum:acc.upper.water};
+  }
+  const shares=(acc.shares||[]).map(s=>{
+    const water=calcWater(turnover,s.water);
+    const amount=(result+water)*(s.pct/100);
+    return {name:s.name,pct:s.pct,water,amount,waterNum:s.water};
+  });
+  // upper.amount: (result+water)*pct. If client loses (result<0), amount is negative.
+  // Negative amount from upper = upper pays me. So I receive = -upper.amount
+  // Negative amount from share = I pay them. So I pay = -share.amount (but stored as what they get)
+  const upperNet=upper?-upper.amount:0;
+  const sharesNet=shares.reduce((s,x)=>s+(-x.amount),0);
+  const myNet=upperNet-sharesNet;
+  
+  // Water profit from difference
+  let waterProfit=0;
+  if(acc.upper){
+    const baseWater=acc.baseWater||100;
+    // Diff between what upper gives me in water vs what I give shares at base water
+    // This is already embedded in myNet, just calculate it for display
+    const upperWaterTotal=calcWater(turnover,acc.upper.water);
+    const avgShareWater=shares.length>0?shares.reduce((s,x)=>s+x.water,0)/shares.length:0;
+    // Actually, the diff is just naturally in myNet. Let's compute explicit water profit:
+    // For each share, if their water < upper water, the difference * their pct is my extra
+    shares.forEach(s=>{
+      const diff=calcWater(turnover,acc.upper.water)-calcWater(turnover,s.waterNum);
+      if(diff>0) waterProfit+=diff*(s.pct/100);
+    });
+  }
+  
+  return {upper,shares,myNet,waterProfit,upperNet,sharesNet};
+}
+
+// ═══════════════════════════ RECORDS ═══════════════════════════
+function populateWeekSelects() {
+  const weeks=[...new Set(DB.records.map(r=>r.week))].sort().reverse();
+  const cw=getCurrentWeek(); if(!weeks.includes(cw)) weeks.unshift(cw);
+  const opts=weeks.map(w=>`<option value="${w}">${getWeekDisplay(w)} (${w})</option>`).join('');
+  ['records-week-filter','settle-week-filter','verify-week-filter'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=opts;});
+  const months=[...new Set(DB.records.map(r=>r.week.slice(0,7)))].sort().reverse();
+  const cm=getMonthLabel(new Date()); if(!months.includes(cm)) months.unshift(cm);
+  const mEl=document.getElementById('monthly-filter'); if(mEl) mEl.innerHTML=months.map(m=>`<option value="${m}">${m}</option>`).join('');
+}
+function openRecordModal(id) {
+  _editRecordId=id||null; const rec=id?DB.records.find(r=>r.id===id):null;
+  const accSel=document.getElementById('rec-account');
+  accSel.innerHTML=DB.accounts.map(a=>`<option value="${a.id}">${a.name}</option>`).join('');
+  if(rec) accSel.value=rec.accountId;
+  document.getElementById('rec-result').value=rec?rec.result:'';
+  document.getElementById('rec-turnover').value=rec?rec.turnover:'';
+  document.getElementById('rec-note').value=rec?rec.note||'':'';
+  const weekSel=document.getElementById('rec-week');
+  const weeks=[...new Set(DB.records.map(r=>r.week))].sort().reverse();
+  const cw=getCurrentWeek(); if(!weeks.includes(cw)) weeks.unshift(cw);
+  weekSel.innerHTML=weeks.map(w=>`<option value="${w}">${getWeekDisplay(w)}</option>`).join('');
+  if(rec) weekSel.value=rec.week;
+  document.getElementById('rec-preview').style.display='none';
+  openModal('modal-record');
+}
+function previewRecord() {
+  const accId=document.getElementById('rec-account').value;
+  const result=parseFloat(document.getElementById('rec-result').value)||0;
+  const turnover=parseFloat(document.getElementById('rec-turnover').value)||0;
+  const acc=DB.accounts.find(a=>a.id===accId);
+  const preview=document.getElementById('rec-preview');
+  if(!acc||(!result&&!turnover)){preview.style.display='none';return;}
+  preview.style.display='block';
+  const calc=calcRecord(acc,result,turnover);
+  let html=`<div class="card-title">即時預覽</div><div class="text-sm mb-12">輸贏: ${fmt(result)} ｜ 流水: ${fmtAbs(turnover)}</div>`;
+  if(calc.upper) html+=`<div style="padding:4px 0;font-size:13px;"><span style="color:var(--accent2);">▲ ${calc.upper.name}</span> (${calc.upper.pct}%, 水${calc.upper.waterNum})：水錢 ${fmt(Math.round(calc.upper.water))}，交收 <span class="mono" style="font-weight:700;color:${(-calc.upper.amount)>=0?'var(--accent)':'var(--red)'};">${fmt(Math.round(-calc.upper.amount))}</span></div>`;
+  calc.shares.forEach(s=>{
+    html+=`<div style="padding:4px 0;font-size:13px;"><span style="color:var(--accent);">▼ ${s.name}</span> (${s.pct}%, 水${s.waterNum})：水錢 ${fmt(Math.round(s.water))}，分成 <span class="mono" style="font-weight:700;color:${(-s.amount)>=0?'var(--accent)':'var(--red)'};">${fmt(Math.round(-s.amount))}</span></div>`;
+  });
+  const myPct=100-(calc.upper?calc.upper.pct:0)-calc.shares.reduce((s,x)=>s+x.pct,0);
+  html+=`<hr class="divider"><div style="font-size:14px;font-weight:700;">👤 我 (${myPct}%)：<span class="mono" style="color:${calc.myNet>=0?'var(--accent)':'var(--red)'}">${fmt(Math.round(calc.myNet))}</span></div>`;
+  if(calc.waterProfit>0) html+=`<div style="font-size:12px;color:var(--yellow);margin-top:4px;">其中差額水收入：${fmt(Math.round(calc.waterProfit))}</div>`;
+  // Verification
+  const upperAmt=calc.upper?Math.round(-calc.upper.amount):Math.round(-result); // if banker, total is -result
+  const sharesAmt=Math.round(calc.shares.reduce((s,x)=>s+(-x.amount),0));
+  const myAmt=Math.round(calc.myNet);
+  const balanced=Math.abs(upperAmt-(sharesAmt+myAmt))<2;
+  html+=`<div class="verify-row ${balanced?'verify-ok':'verify-err'}" style="font-size:12px;">${balanced?'✅':'⚠️'} 驗證：上家 ${fmt(upperAmt)} ＝ 股東 ${fmt(sharesAmt)} ＋ 我 ${fmt(myAmt)}</div>`;
+  preview.innerHTML=html;
+}
+function saveRecord() {
+  const accountId=document.getElementById('rec-account').value;
+  const result=parseFloat(document.getElementById('rec-result').value);
+  const turnover=parseFloat(document.getElementById('rec-turnover').value);
+  const week=document.getElementById('rec-week').value;
+  if(!accountId){toast('請選擇帳號');return;}
+  if(isNaN(result)){toast('請填寫輸贏金額');return;}
+  if(isNaN(turnover)||turnover<0){toast('請填寫流水金額');return;}
+  const rec={id:_editRecordId||uid(),accountId,result,turnover,week,note:document.getElementById('rec-note').value.trim(),
+    ts:_editRecordId?(DB.records.find(r=>r.id===_editRecordId)||{}).ts||Date.now():Date.now()};
+  if(_editRecordId){const i=DB.records.findIndex(r=>r.id===_editRecordId);if(i>=0)DB.records[i]=rec;}else DB.records.push(rec);
+  save();closeModal('modal-record');renderRecords();populateWeekSelects();toast('✅ 已儲存');
+}
+function deleteRecord(id){if(!confirm('確定刪除？'))return;DB.records=DB.records.filter(r=>r.id!==id);save();renderRecords();toast('已刪除');}
+function renderRecords() {
+  populateWeekSelects();
+  const week=document.getElementById('records-week-filter').value;
+  const recs=DB.records.filter(r=>r.week===week);
+  const el=document.getElementById('records-list');
+  if(!recs.length){el.innerHTML='<div class="empty-state">本週無記錄</div>';return;}
+  let tResult=0,tTurnover=0,tMyNet=0;
+  const rows=recs.map(r=>{
+    const acc=DB.accounts.find(a=>a.id===r.accountId);
+    const name=acc?acc.name:'(已刪除)';
+    const calc=acc?calcRecord(acc,r.result,r.turnover):null;
+    tResult+=r.result;tTurnover+=r.turnover;
+    const myNet=calc?Math.round(calc.myNet):0; tMyNet+=myNet;
+    return `<tr><td style="font-weight:600;">${name}</td>
+      <td class="mono" style="color:${r.result>=0?'var(--accent)':'var(--red)'}">${fmt(r.result)}</td>
+      <td class="mono">${fmtAbs(r.turnover)}</td>
+      <td class="mono" style="font-weight:700;color:${myNet>=0?'var(--accent)':'var(--red)'}">${fmt(myNet)}</td>
+      <td style="color:var(--text3);font-size:12px;">${r.note||''}</td>
+      <td><div class="btn-row"><button class="btn btn-ghost btn-xs" onclick="openRecordModal('${r.id}')">編輯</button><button class="btn btn-danger btn-xs" onclick="deleteRecord('${r.id}')">刪除</button></div></td></tr>`;
+  }).join('');
+  el.innerHTML=`<div class="card"><div class="table-wrap"><table><thead><tr><th>帳號</th><th>輸贏</th><th>流水</th><th>我的淨收</th><th>備註</th><th></th></tr></thead><tbody>${rows}
+    <tr style="border-top:2px solid var(--accent);font-weight:700;"><td>合計</td>
+    <td class="mono" style="color:${tResult>=0?'var(--accent)':'var(--red)'}">${fmt(tResult)}</td>
+    <td class="mono">${fmtAbs(tTurnover)}</td>
+    <td class="mono" style="color:${tMyNet>=0?'var(--accent)':'var(--red)'}">${fmt(tMyNet)}</td>
+    <td colspan="2"></td></tr></tbody></table></div></div>`;
+}
+
+// ═══════════════════════════ SETTLEMENT ═══════════════════════════
+function renderSettlement() {
+  populateWeekSelects();
+  const week=document.getElementById('settle-week-filter').value;
+  const recs=DB.records.filter(r=>r.week===week);
+  const el=document.getElementById('settlement-content');
+  if(!recs.length){el.innerHTML='<div class="empty-state">本週無記錄</div>';return;}
+  const pMap={};let tMyNet=0;
+  recs.forEach(r=>{
+    const acc=DB.accounts.find(a=>a.id===r.accountId);if(!acc)return;
+    const calc=calcRecord(acc,r.result,r.turnover); tMyNet+=calc.myNet;
+    if(calc.upper){
+      const n=calc.upper.name||'上家';if(!pMap[n])pMap[n]={recv:0,pay:0,details:[]};
+      const amt=-calc.upper.amount;
+      if(amt>=0)pMap[n].recv+=amt;else pMap[n].pay+=Math.abs(amt);
+      pMap[n].details.push({acc:acc.name,result:r.result,turnover:r.turnover,water:Math.round(calc.upper.water),amount:Math.round(-calc.upper.amount)});
+    }
+    calc.shares.forEach(s=>{
+      if(!pMap[s.name])pMap[s.name]={recv:0,pay:0,details:[]};
+      const amt=-s.amount;
+      if(amt<=0)pMap[s.name].recv+=Math.abs(amt);else pMap[s.name].pay+=amt;
+      pMap[s.name].details.push({acc:acc.name,result:r.result,turnover:r.turnover,water:Math.round(s.water),amount:Math.round(-s.amount)});
+    });
+  });
+  let tRecv=0,tPay=0;
+  Object.values(pMap).forEach(p=>{tRecv+=p.recv;tPay+=p.pay;});
+  let html=`<div class="summary-grid mb-16">
+    <div class="summary-box"><div class="label">我的淨收入</div><div class="value" style="color:${tMyNet>=0?'var(--accent)':'var(--red)'}">${fmt(Math.round(tMyNet))}</div></div>
+    <div class="summary-box"><div class="label">應收合計</div><div class="value green">${fmtAbs(Math.round(tRecv))}</div></div>
+    <div class="summary-box"><div class="label">應付合計</div><div class="value red">${fmtAbs(Math.round(tPay))}</div></div>
+  </div>`;
+  Object.entries(pMap).forEach(([name,data])=>{
+    const net=data.recv-data.pay;
+    html+=`<div class="settle-card"><div class="settle-header"><span style="font-weight:700;font-size:15px;">${name}</span>
+      <span class="mono" style="font-weight:700;color:${net>=0?'var(--accent)':'var(--red)'}">${net>=0?'應收':'應付'} ${fmtAbs(net)}</span></div>
+      <div class="table-wrap"><table style="font-size:12px;"><thead><tr><th>帳號</th><th>輸贏</th><th>流水</th><th>水錢</th><th>交收金額</th></tr></thead>
+      <tbody>${data.details.map(d=>`<tr><td>${d.acc}</td>
+        <td class="mono" style="color:${d.result>=0?'var(--accent)':'var(--red)'}">${fmt(d.result)}</td>
+        <td class="mono">${fmtAbs(d.turnover)}</td><td class="mono">${fmt(d.water)}</td>
+        <td class="mono" style="font-weight:600;color:${d.amount>=0?'var(--accent)':'var(--red)'}">${fmt(d.amount)}</td></tr>`).join('')}</tbody></table></div></div>`;
+  });
+  el.innerHTML=html;
+}
+
+// ═══════════════════════════ MONTHLY ═══════════════════════════
+function renderMonthly() {
+  populateWeekSelects();
+  const month=document.getElementById('monthly-filter').value;
+  const recs=DB.records.filter(r=>r.week.startsWith(month));
+  const el=document.getElementById('monthly-content');
+  if(!recs.length){el.innerHTML='<div class="empty-state">本月無記錄</div>';return;}
+  const wMap={};
+  recs.forEach(r=>{if(!wMap[r.week])wMap[r.week]=[];wMap[r.week].push(r);});
+  let mTotal=0;let html='';
+  Object.keys(wMap).sort().forEach(week=>{
+    let wNet=0;
+    wMap[week].forEach(r=>{const acc=DB.accounts.find(a=>a.id===r.accountId);if(acc)wNet+=calcRecord(acc,r.result,r.turnover).myNet;});
+    mTotal+=wNet;
+    html+=`<div class="settle-card"><div class="flex-between"><span style="font-weight:600;">${getWeekDisplay(week)}</span>
+      <span class="mono" style="font-weight:700;color:${wNet>=0?'var(--accent)':'var(--red)'}">${fmt(Math.round(wNet))}</span></div></div>`;
+  });
+  el.innerHTML=`<div class="summary-grid mb-16">
+    <div class="summary-box"><div class="label">月份</div><div class="value blue">${month}</div></div>
+    <div class="summary-box"><div class="label">月淨利潤</div><div class="value" style="color:${mTotal>=0?'var(--accent)':'var(--red)'}">${fmt(Math.round(mTotal))}</div></div>
+    <div class="summary-box"><div class="label">週數</div><div class="value">${Object.keys(wMap).length}</div></div>
+  </div>`+html;
+}
+
+// ═══════════════════════════ VERIFY ═══════════════════════════
+function renderVerify() {
+  populateWeekSelects();
+  const week=document.getElementById('verify-week-filter').value;
+  const recs=DB.records.filter(r=>r.week===week);
+  const el=document.getElementById('verify-content');
+  if(!recs.length){el.innerHTML='<div class="empty-state">本週無記錄</div>';return;}
+  let html='';
+  recs.forEach(r=>{
+    const acc=DB.accounts.find(a=>a.id===r.accountId);if(!acc)return;
+    const calc=calcRecord(acc,r.result,r.turnover);
+    const upperAmt=calc.upper?Math.round(-calc.upper.amount):0;
+    const sharesTotal=Math.round(calc.shares.reduce((s,x)=>s+(-x.amount),0));
+    const myPortion=Math.round(calc.myNet);
+    const checkSum=sharesTotal+myPortion;
+    const balanced=Math.abs(upperAmt-checkSum)<2;
+    const myPct=100-(calc.upper?calc.upper.pct:0)-calc.shares.reduce((s,x)=>s+x.pct,0);
+    html+=`<div class="card mb-12"><div class="flex-between mb-12"><span style="font-weight:700;font-size:15px;">${acc.name}</span>
+      <span class="text-sm">輸贏 ${fmt(r.result)} ｜ 流水 ${fmtAbs(r.turnover)}</span></div>
+      <div class="table-wrap"><table style="font-size:12px;"><thead><tr><th>對象</th><th>比例</th><th>水數</th><th>水錢</th><th>交收金額</th></tr></thead><tbody>
+      ${calc.upper?`<tr style="background:var(--blue-dim);"><td>▲ ${calc.upper.name} (上家)</td><td class="mono">${calc.upper.pct}%</td><td class="mono">${calc.upper.waterNum}</td><td class="mono">${fmt(Math.round(calc.upper.water))}</td><td class="mono" style="font-weight:700;color:${upperAmt>=0?'var(--accent)':'var(--red)'}">${fmt(upperAmt)}</td></tr>`:''}
+      ${calc.shares.map(s=>`<tr><td>▼ ${s.name}</td><td class="mono">${s.pct}%</td><td class="mono">${s.waterNum}</td><td class="mono">${fmt(Math.round(s.water))}</td><td class="mono" style="font-weight:700;color:${(-s.amount)>=0?'var(--accent)':'var(--red)'}">${fmt(Math.round(-s.amount))}</td></tr>`).join('')}
+      <tr style="border-top:2px solid var(--accent);"><td style="font-weight:700;">👤 我</td><td class="mono">${myPct}%</td><td colspan="2"></td><td class="mono" style="font-weight:700;color:${myPortion>=0?'var(--accent)':'var(--red)'}">${fmt(myPortion)}</td></tr>
+      </tbody></table></div>
+      <div class="verify-row ${balanced?'verify-ok':'verify-err'}">${balanced?'✅':'⚠️'} 上家 ${fmt(upperAmt)} ${balanced?'＝':'≠'} 股東 ${fmt(sharesTotal)} ＋ 我 ${fmt(myPortion)} ＝ ${fmt(checkSum)}</div></div>`;
+  });
+  el.innerHTML=html;
+}
+
+// ═══════════════════════════ DASHBOARD ═══════════════════════════
+function renderDashboard() {
+  populateWeekSelects();
+  const cw=getCurrentWeek(),cm=getMonthLabel(new Date());
+  const wRecs=DB.records.filter(r=>r.week===cw),mRecs=DB.records.filter(r=>r.week.startsWith(cm));
+  let wNet=0,mNet=0,tRecv=0,tPay=0;
+  wRecs.forEach(r=>{const acc=DB.accounts.find(a=>a.id===r.accountId);if(acc){const c=calcRecord(acc,r.result,r.turnover);wNet+=c.myNet;if(c.upperNet>=0)tRecv+=c.upperNet;else tPay+=Math.abs(c.upperNet);tPay+=c.sharesNet;}});
+  mRecs.forEach(r=>{const acc=DB.accounts.find(a=>a.id===r.accountId);if(acc)mNet+=calcRecord(acc,r.result,r.turnover).myNet;});
+  const setVal=(id,v,col)=>{const e=document.getElementById(id);e.textContent='$'+fmt(Math.round(v));if(col)e.style.color=v>=0?'var(--accent)':'var(--red)';};
+  setVal('dash-weekly',wNet,true);setVal('dash-monthly',mNet,true);
+  document.getElementById('dash-recv').textContent='$'+fmtAbs(tRecv);
+  document.getElementById('dash-pay').textContent='$'+fmtAbs(tPay);
+  const recent=[...DB.records].sort((a,b)=>b.ts-a.ts).slice(0,6);
+  document.getElementById('dash-recent').innerHTML=recent.length?recent.map(r=>{const acc=DB.accounts.find(a=>a.id===r.accountId);return `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px;"><span>${acc?acc.name:'?'}</span><span class="mono" style="color:${r.result>=0?'var(--accent)':'var(--red)'}">${fmt(r.result)}</span></div>`;}).join(''):'<div class="empty-state">尚無記錄</div>';
+  document.getElementById('dash-accounts').innerHTML=DB.accounts.length?DB.accounts.map(acc=>{let net=0;wRecs.filter(r=>r.accountId===acc.id).forEach(r=>{net+=calcRecord(acc,r.result,r.turnover).myNet;});return `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px;"><span>${acc.name}</span><span class="mono" style="color:${net>=0?'var(--accent)':'var(--red)'}">${fmt(Math.round(net))}</span></div>`;}).join(''):'<div class="empty-state">尚無帳號</div>';
+}
+
+// ═══════════════════════════ PW MANAGER ═══════════════════════════
+function showPwManager(){openModal('modal-pwmanager');renderPwList();}
+async function renderPwList(){const el=document.getElementById('pwm-list');el.innerHTML='<div class="text-sm" style="text-align:center;padding:12px;">載入中...</div>';try{const entries=await apiGet('/api/passwords');if(!entries.length){el.innerHTML='<div class="empty-state">尚無記錄</div>';return;}el.innerHTML=entries.map(e=>`<div style="background:var(--surface2);border-radius:8px;padding:10px 12px;margin-bottom:6px;"><div style="display:flex;justify-content:space-between;align-items:start;"><div><div style="font-weight:700;font-size:14px;">${e.site}</div><div style="font-size:12px;color:var(--text2);">帳號：${e.account}</div><div style="font-size:12px;color:var(--text2);display:flex;align-items:center;gap:6px;">密碼：<span id="pwm-pw-${e.id}">••••••</span><button class="btn btn-ghost btn-xs" onclick="togglePw('${e.id}','${e.password}')">顯示</button></div>${e.note?`<div style="font-size:11px;color:var(--text3);margin-top:2px;">${e.note}</div>`:''}</div><button class="btn btn-danger btn-xs" onclick="deletePwEntry(${e.id})">刪除</button></div></div>`).join('');}catch{el.innerHTML='<div style="color:var(--red);padding:12px;">載入失敗</div>';}}
+function togglePw(id,pw){const el=document.getElementById('pwm-pw-'+id);el.textContent=el.textContent==='••••••'?pw:'••••••';}
+async function savePwEntry(){const s=document.getElementById('pwm-site').value.trim(),a=document.getElementById('pwm-account').value.trim(),p=document.getElementById('pwm-password').value.trim();if(!s||!a||!p){toast('請填寫完整');return;}await apiPost('/api/passwords',{site:s,account:a,password:p,note:document.getElementById('pwm-note').value.trim()});['pwm-site','pwm-account','pwm-password','pwm-note'].forEach(id=>document.getElementById(id).value='');renderPwList();toast('✅ 已儲存');}
+async function deletePwEntry(id){await apiDelete('/api/passwords/'+id);renderPwList();toast('已刪除');}
+async function changeSystemPw(){const o=document.getElementById('pwm-change-old').value,n=document.getElementById('pwm-change-new').value.trim(),m=document.getElementById('pwm-change-msg'),r=await apiPost('/api/change-password',{oldPassword:o,newPassword:n});if(r.ok){m.style.color='var(--accent)';m.textContent='✅ 密碼已更新';}else{m.style.color='var(--red)';m.textContent=r.error;}setTimeout(()=>m.textContent='',2500);}
+
+// ═══════════════════════════ API ═══════════════════════════
+function getToken(){return localStorage.getItem('ball_token')||'';}
+function authHeaders(){return {'Content-Type':'application/json','Authorization':'Bearer '+getToken()};}
+let _saveTimer=null;
+function save(){clearTimeout(_saveTimer);_saveTimer=setTimeout(async()=>{try{await fetch('/api/data',{method:'POST',headers:authHeaders(),body:JSON.stringify({data:DB})})}catch(e){console.warn('Auto-save failed',e);}},600);}
+async function apiGet(url){const r=await fetch(url,{headers:authHeaders()});if(r.status===401){showLogin();throw new Error('Unauthorized');}return r.json();}
+async function apiPost(url,body){const r=await fetch(url,{method:'POST',headers:authHeaders(),body:JSON.stringify(body)});if(r.status===401){showLogin();throw new Error('Unauthorized');}return r.json();}
+async function apiDelete(url){const r=await fetch(url,{method:'DELETE',headers:authHeaders()});return r.json();}
+function showLogin(){document.getElementById('pw-overlay').style.display='flex';}
+async function doLogin(){const u=document.getElementById('login-username').value.trim(),p=document.getElementById('login-password').value,err=document.getElementById('pw-error');if(!u||!p){err.textContent='請填寫帳號和密碼';return;}try{const r=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p})});const d=await r.json();if(d.ok){localStorage.setItem('ball_token',d.token);document.getElementById('pw-overlay').style.display='none';await loadFromServer();renderAll();toast('✅ 歡迎，'+d.username);}else err.textContent=d.error||'登入失敗';}catch(e){err.textContent='連線錯誤';}}
+async function doRegister(){const u=document.getElementById('login-username').value.trim(),p=document.getElementById('login-password').value,err=document.getElementById('pw-error');if(!u||!p){err.textContent='請填寫帳號和密碼';return;}try{const r=await fetch('/api/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({username:u,password:p})});const d=await r.json();if(d.ok){err.style.color='var(--accent)';err.textContent='帳號建立成功，請重新登入';document.getElementById('register-section').style.display='none';}else err.textContent=d.error;}catch(e){err.textContent='連線錯誤';}}
+async function loadFromServer(){try{const r=await fetch('/api/data',{headers:authHeaders()});if(r.status===401){showLogin();return;}const data=await r.json();if(data.data){DB=data.data;if(!DB.contacts)DB.contacts=[];if(!DB.accounts)DB.accounts=[];if(!DB.records)DB.records=[];}}catch(e){console.error('loadFromServer failed',e);}}
+function renderAll(){renderDashboard();renderAccounts();renderContacts();renderRecords();}
+async function exportData(){window.location.href='/api/export';}
+async function importData(file){const reader=new FileReader();reader.onload=async e=>{try{const all=JSON.parse(e.target.result);const r=await apiPost('/api/import',all);if(r.ok){await loadFromServer();renderAll();toast('✅ 匯入成功');}}catch{toast('❌ 匯入失敗');}};reader.readAsText(file);}
+function doLogout(){localStorage.removeItem('ball_token');window.location.reload();}
+
+// ═══════════════════════════ INIT ═══════════════════════════
+document.getElementById('today-date').textContent=new Date().toLocaleDateString('zh-TW',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+(async()=>{try{const me=await fetch('/api/me',{headers:authHeaders()});if(me.ok){await loadFromServer();document.getElementById('pw-overlay').style.display='none';renderAll();}else{try{const rt=await fetch('/api/check-init');const rd=await rt.json();if(!rd.initialized){document.getElementById('register-section').style.display='block';document.getElementById('login-subtitle').textContent='首次使用，請建立管理員帳號';}}catch(e){}showLogin();}}catch(e){showLogin();}})();
+</script>
 </body>
 </html>
