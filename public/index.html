@@ -6,148 +6,79 @@
 <title>球帳管理系統</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
 <style>
-:root {
-  --bg: #08090d;
-  --surface: #0f1117;
-  --surface2: #161a24;
-  --surface3: #1c2130;
-  --border: #252d3f;
-  --accent: #34d399;
-  --accent-dim: rgba(52,211,153,.1);
-  --accent2: #38bdf8;
-  --red: #f87171;
-  --red-dim: rgba(248,113,113,.1);
-  --yellow: #fbbf24;
-  --yellow-dim: rgba(251,191,36,.1);
-  --blue-dim: rgba(56,189,248,.1);
-  --text: #e4e8f0;
-  --text2: #8c95a8;
-  --text3: #5a6478;
-  --radius: 10px;
-}
-* { margin:0; padding:0; box-sizing:border-box; }
-body { background:var(--bg); color:var(--text); font-family:'Noto Sans TC',sans-serif; min-height:100vh; overflow-x:hidden; }
-::-webkit-scrollbar { width:4px; }
-::-webkit-scrollbar-track { background:transparent; }
-::-webkit-scrollbar-thumb { background:var(--border); border-radius:4px; }
-
-.sidebar { position:fixed; left:0; top:0; width:230px; height:100vh; background:var(--surface); border-right:1px solid var(--border); display:flex; flex-direction:column; z-index:100; }
-.logo { padding:22px 20px; border-bottom:1px solid var(--border); }
-.logo-text { font-family:'JetBrains Mono',monospace; font-size:15px; font-weight:700; color:var(--accent); letter-spacing:1px; }
-.logo-sub { color:var(--text3); font-size:11px; margin-top:2px; }
-.nav { flex:1; padding:10px 0; overflow-y:auto; }
-.nav-item { display:flex; align-items:center; gap:10px; padding:11px 20px; cursor:pointer; font-size:13px; color:var(--text2); transition:all .15s; border-left:2px solid transparent; }
-.nav-item:hover { color:var(--text); background:var(--surface2); }
-.nav-item.active { color:var(--accent); background:var(--accent-dim); border-left-color:var(--accent); font-weight:600; }
-.nav-icon { font-size:16px; width:22px; text-align:center; }
-.nav-bottom { padding:12px; border-top:1px solid var(--border); display:flex; flex-direction:column; gap:6px; }
-.main { margin-left:230px; padding:24px 28px; min-height:100vh; }
-.page { display:none; }
-.page.active { display:block; }
-.page-header { margin-bottom:22px; display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; }
-.page-title { font-size:20px; font-weight:700; }
-.page-sub { font-size:12px; color:var(--text3); margin-top:3px; }
-.card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:18px; }
-.card-title { font-size:11px; font-weight:700; color:var(--text3); margin-bottom:14px; text-transform:uppercase; letter-spacing:.8px; }
-.stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:18px; }
-.stat-card { background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:16px 18px; }
-.stat-label { font-size:10px; color:var(--text3); text-transform:uppercase; letter-spacing:.5px; font-weight:600; }
-.stat-val { font-size:24px; font-weight:700; font-family:'JetBrains Mono',monospace; margin-top:5px; }
-.green { color:var(--accent); }
-.red { color:var(--red); }
-.blue { color:var(--accent2); }
-.yellow { color:var(--yellow); }
-.table-wrap { overflow-x:auto; }
-table { width:100%; border-collapse:collapse; font-size:13px; }
-thead th { text-align:left; padding:9px 12px; background:var(--surface2); color:var(--text3); font-weight:600; font-size:11px; text-transform:uppercase; letter-spacing:.5px; border-bottom:1px solid var(--border); white-space:nowrap; }
-tbody tr { border-bottom:1px solid var(--border); transition:background .1s; }
-tbody tr:hover { background:var(--surface2); }
-tbody td { padding:10px 12px; }
-.badge { display:inline-block; padding:2px 8px; border-radius:4px; font-size:11px; font-weight:600; }
-.badge-green { background:var(--accent-dim); color:var(--accent); }
-.badge-red { background:var(--red-dim); color:var(--red); }
-.badge-blue { background:var(--blue-dim); color:var(--accent2); }
-.badge-yellow { background:var(--yellow-dim); color:var(--yellow); }
-.btn { padding:8px 16px; border-radius:7px; border:none; cursor:pointer; font-size:13px; font-weight:600; transition:all .15s; font-family:'Noto Sans TC',sans-serif; }
-.btn-primary { background:var(--accent); color:#0a0c10; }
-.btn-primary:hover { background:#22c55e; }
-.btn-ghost { background:var(--surface2); color:var(--text); border:1px solid var(--border); }
-.btn-ghost:hover { background:var(--surface3); }
-.btn-danger { background:var(--red-dim); color:var(--red); border:1px solid rgba(248,113,113,.2); }
-.btn-danger:hover { background:rgba(248,113,113,.2); }
-.btn-sm { padding:5px 12px; font-size:12px; }
-.btn-xs { padding:3px 8px; font-size:11px; }
-.btn-row { display:flex; gap:8px; flex-wrap:wrap; }
-.form-grid { display:grid; gap:12px; }
-.form-grid-2 { grid-template-columns:1fr 1fr; }
-.form-grid-3 { grid-template-columns:1fr 1fr 1fr; }
-.form-group label { display:block; font-size:12px; color:var(--text2); margin-bottom:5px; font-weight:500; }
-.form-group input, .form-group select, .form-group textarea {
-  width:100%; background:var(--surface2); border:1px solid var(--border); color:var(--text);
-  border-radius:7px; padding:8px 11px; font-size:13px; font-family:'Noto Sans TC',sans-serif; outline:none; transition:border .15s;
-}
-.form-group input:focus, .form-group select:focus { border-color:var(--accent); }
-.form-group select option { background:var(--surface2); }
-.form-group input[type=number] { font-family:'JetBrains Mono',monospace; }
-.overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.75); z-index:200; align-items:center; justify-content:center; }
-.overlay.open { display:flex; }
-.modal { background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:24px; width:92%; max-width:640px; max-height:88vh; overflow-y:auto; }
-.modal-title { font-size:16px; font-weight:700; margin-bottom:18px; display:flex; align-items:center; gap:8px; }
-.modal-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:18px; }
-.toast { position:fixed; bottom:24px; right:24px; z-index:999; background:var(--surface2); border:1px solid var(--accent); border-radius:8px; padding:12px 20px; font-size:13px; color:var(--accent); transform:translateY(60px); opacity:0; transition:all .3s; }
-.toast.show { transform:translateY(0); opacity:1; }
-.mono { font-family:'JetBrains Mono',monospace; }
-.text-sm { font-size:12px; color:var(--text3); }
-.mt-8 { margin-top:8px; }
-.mt-12 { margin-top:12px; }
-.mb-12 { margin-bottom:12px; }
-.mb-16 { margin-bottom:16px; }
-.flex-between { display:flex; justify-content:space-between; align-items:center; }
-.grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
-.divider { border:none; border-top:1px solid var(--border); margin:14px 0; }
-.empty-state { text-align:center; color:var(--text3); padding:28px 0; font-size:13px; }
-.icon-btn { width:28px; height:28px; border-radius:6px; border:1px solid var(--border); background:var(--surface2); cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:13px; transition:all .15s; color:var(--text2); }
-.icon-btn:hover { background:var(--surface3); color:var(--text); }
-.settle-card { border:1px solid var(--border); border-radius:8px; padding:14px; margin-bottom:10px; background:var(--surface); }
-.settle-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
-.summary-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:12px; }
-.summary-box { background:var(--surface2); border-radius:8px; padding:12px; }
-.summary-box .label { font-size:10px; color:var(--text3); margin-bottom:3px; text-transform:uppercase; font-weight:600; }
-.summary-box .value { font-size:16px; font-weight:700; font-family:'JetBrains Mono',monospace; }
-.verify-row { display:flex; align-items:center; gap:8px; padding:8px 12px; border-radius:7px; font-size:13px; font-weight:600; margin-top:8px; }
-.verify-ok { background:var(--accent-dim); color:var(--accent); }
-.verify-err { background:var(--red-dim); color:var(--red); }
-.pw-overlay { position:fixed; inset:0; z-index:999; background:var(--bg); display:flex; align-items:center; justify-content:center; }
-.pw-box { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:32px; width:90%; max-width:360px; text-align:center; }
-.pw-box h2 { font-size:22px; margin-bottom:6px; }
-.pw-box p { color:var(--text3); font-size:13px; margin-bottom:20px; }
-.pw-input { width:100%; background:var(--surface2); border:1px solid var(--border); color:var(--text); border-radius:8px; padding:12px; font-size:16px; text-align:center; outline:none; margin-bottom:12px; box-sizing:border-box; }
-.pw-error { color:var(--red); font-size:13px; margin-bottom:10px; min-height:18px; }
-.share-row { display:grid; grid-template-columns:1fr 80px 80px 32px; gap:8px; align-items:center; margin-bottom:6px; }
-.share-row input { text-align:center; }
-.bottom-nav { position:fixed; bottom:0; left:0; right:0; z-index:200; background:var(--surface); border-top:1px solid var(--border); justify-content:space-around; align-items:center; padding:6px 0 env(safe-area-inset-bottom,6px) 0; display:none; }
-.bottom-nav-item { display:flex; flex-direction:column; align-items:center; gap:2px; padding:6px 6px; border-radius:8px; cursor:pointer; color:var(--text3); font-size:9px; min-width:44px; transition:color .15s; }
-.bottom-nav-item.active { color:var(--accent); }
-.bottom-nav-item .bn-icon { font-size:20px; line-height:1; }
-@media (max-width:768px) {
-  .sidebar { display:none; }
-  .main { margin-left:0; padding:12px 10px 80px 10px; }
-  .stats-row { grid-template-columns:1fr 1fr; }
-  .form-grid-2, .form-grid-3 { grid-template-columns:1fr; }
-  .grid-2 { grid-template-columns:1fr; }
-  .summary-grid { grid-template-columns:1fr 1fr; }
-  .modal { width:96vw; max-height:92vh; padding:16px; }
-  .page-title { font-size:17px; }
-  .share-row { grid-template-columns:1fr 60px 60px 28px; gap:4px; }
-  .bottom-nav { display:flex; }
-  table { font-size:12px; }
-  th, td { padding:6px 4px; }
-}
-@media (min-width:769px) { .bottom-nav { display:none; } }
+:root{--bg:#08090d;--surface:#0f1117;--surface2:#161a24;--surface3:#1c2130;--border:#252d3f;--accent:#34d399;--accent-dim:rgba(52,211,153,.1);--accent2:#38bdf8;--red:#f87171;--red-dim:rgba(248,113,113,.1);--yellow:#fbbf24;--yellow-dim:rgba(251,191,36,.1);--blue-dim:rgba(56,189,248,.1);--purple:#a78bfa;--purple-dim:rgba(167,139,250,.1);--text:#e4e8f0;--text2:#8c95a8;--text3:#5a6478;--radius:10px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans TC',sans-serif;min-height:100vh;overflow-x:hidden}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+.sidebar{position:fixed;left:0;top:0;width:230px;height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:100}
+.logo{padding:22px 20px;border-bottom:1px solid var(--border)}.logo-text{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:700;color:var(--accent);letter-spacing:1px}.logo-sub{color:var(--text3);font-size:11px;margin-top:2px}
+.nav{flex:1;padding:10px 0;overflow-y:auto}
+.nav-item{display:flex;align-items:center;gap:10px;padding:11px 20px;cursor:pointer;font-size:13px;color:var(--text2);transition:all .15s;border-left:2px solid transparent}
+.nav-item:hover{color:var(--text);background:var(--surface2)}.nav-item.active{color:var(--accent);background:var(--accent-dim);border-left-color:var(--accent);font-weight:600}
+.nav-icon{font-size:16px;width:22px;text-align:center}.nav-bottom{padding:12px;border-top:1px solid var(--border);display:flex;flex-direction:column;gap:6px}
+.main{margin-left:230px;padding:24px 28px;min-height:100vh}.page{display:none}.page.active{display:block}
+.page-header{margin-bottom:22px;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:12px}
+.page-title{font-size:20px;font-weight:700}.page-sub{font-size:12px;color:var(--text3);margin-top:3px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px}
+.card-title{font-size:11px;font-weight:700;color:var(--text3);margin-bottom:14px;text-transform:uppercase;letter-spacing:.8px}
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px}
+.stat-label{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;font-weight:600}
+.stat-val{font-size:24px;font-weight:700;font-family:'JetBrains Mono',monospace;margin-top:5px}
+.green{color:var(--accent)}.red{color:var(--red)}.blue{color:var(--accent2)}.yellow{color:var(--yellow)}.purple{color:var(--purple)}
+.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{text-align:left;padding:9px 12px;background:var(--surface2);color:var(--text3);font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:.5px;border-bottom:1px solid var(--border);white-space:nowrap}
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s}tbody tr:hover{background:var(--surface2)}tbody td{padding:10px 12px}
+.badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
+.badge-green{background:var(--accent-dim);color:var(--accent)}.badge-red{background:var(--red-dim);color:var(--red)}
+.badge-blue{background:var(--blue-dim);color:var(--accent2)}.badge-yellow{background:var(--yellow-dim);color:var(--yellow)}
+.badge-purple{background:var(--purple-dim);color:var(--purple)}
+.btn{padding:8px 16px;border-radius:7px;border:none;cursor:pointer;font-size:13px;font-weight:600;transition:all .15s;font-family:'Noto Sans TC',sans-serif}
+.btn-primary{background:var(--accent);color:#0a0c10}.btn-primary:hover{background:#22c55e}
+.btn-ghost{background:var(--surface2);color:var(--text);border:1px solid var(--border)}.btn-ghost:hover{background:var(--surface3)}
+.btn-danger{background:var(--red-dim);color:var(--red);border:1px solid rgba(248,113,113,.2)}.btn-danger:hover{background:rgba(248,113,113,.2)}
+.btn-sm{padding:5px 12px;font-size:12px}.btn-xs{padding:3px 8px;font-size:11px}.btn-row{display:flex;gap:8px;flex-wrap:wrap}
+.form-grid{display:grid;gap:12px}.form-grid-2{grid-template-columns:1fr 1fr}.form-grid-3{grid-template-columns:1fr 1fr 1fr}
+.form-group label{display:block;font-size:12px;color:var(--text2);margin-bottom:5px;font-weight:500}
+.form-group input,.form-group select,.form-group textarea{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:8px 11px;font-size:13px;font-family:'Noto Sans TC',sans-serif;outline:none;transition:border .15s}
+.form-group input:focus,.form-group select:focus{border-color:var(--accent)}.form-group select option{background:var(--surface2)}
+.form-group input[type=number]{font-family:'JetBrains Mono',monospace}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:200;align-items:center;justify-content:center}.overlay.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px;width:92%;max-width:640px;max-height:88vh;overflow-y:auto}
+.modal-title{font-size:16px;font-weight:700;margin-bottom:18px;display:flex;align-items:center;gap:8px}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:18px}
+.toast{position:fixed;bottom:24px;right:24px;z-index:999;background:var(--surface2);border:1px solid var(--accent);border-radius:8px;padding:12px 20px;font-size:13px;color:var(--accent);transform:translateY(60px);opacity:0;transition:all .3s}.toast.show{transform:translateY(0);opacity:1}
+.mono{font-family:'JetBrains Mono',monospace}.text-sm{font-size:12px;color:var(--text3)}
+.mt-8{margin-top:8px}.mt-12{margin-top:12px}.mb-8{margin-bottom:8px}.mb-12{margin-bottom:12px}.mb-16{margin-bottom:16px}
+.flex-between{display:flex;justify-content:space-between;align-items:center}.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.divider{border:none;border-top:1px solid var(--border);margin:14px 0}
+.empty-state{text-align:center;color:var(--text3);padding:28px 0;font-size:13px}
+.icon-btn{width:28px;height:28px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all .15s;color:var(--text2)}.icon-btn:hover{background:var(--surface3);color:var(--text)}
+.settle-card{border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;background:var(--surface)}
+.settle-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.summary-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+.summary-box{background:var(--surface2);border-radius:8px;padding:12px}.summary-box .label{font-size:10px;color:var(--text3);margin-bottom:3px;text-transform:uppercase;font-weight:600}.summary-box .value{font-size:16px;font-weight:700;font-family:'JetBrains Mono',monospace}
+.verify-row{display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:7px;font-size:13px;font-weight:600;margin-top:8px}
+.verify-ok{background:var(--accent-dim);color:var(--accent)}.verify-err{background:var(--red-dim);color:var(--red)}
+.pw-overlay{position:fixed;inset:0;z-index:999;background:var(--bg);display:flex;align-items:center;justify-content:center}
+.pw-box{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:32px;width:90%;max-width:360px;text-align:center}
+.pw-box h2{font-size:22px;margin-bottom:6px}.pw-box p{color:var(--text3);font-size:13px;margin-bottom:20px}
+.pw-input{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:12px;font-size:16px;text-align:center;outline:none;margin-bottom:12px;box-sizing:border-box}
+.pw-error{color:var(--red);font-size:13px;margin-bottom:10px;min-height:18px}
+.share-row{display:grid;grid-template-columns:1fr 80px 80px 32px;gap:8px;align-items:center;margin-bottom:6px}.share-row input{text-align:center}
+.cat-tag{display:inline-flex;align-items:center;gap:4px;padding:2px 10px;border-radius:12px;font-size:11px;font-weight:700;letter-spacing:.3px}
+.cat-ball{background:var(--accent-dim);color:var(--accent)}.cat-bac{background:var(--yellow-dim);color:var(--yellow)}.cat-539{background:var(--purple-dim);color:var(--purple)}
+.filter-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.filter-bar select{background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:7px 12px;font-size:13px;outline:none}
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:200;background:var(--surface);border-top:1px solid var(--border);justify-content:space-around;align-items:center;padding:6px 0 env(safe-area-inset-bottom,6px) 0;display:none}
+.bottom-nav-item{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 6px;border-radius:8px;cursor:pointer;color:var(--text3);font-size:9px;min-width:44px;transition:color .15s}.bottom-nav-item.active{color:var(--accent)}.bottom-nav-item .bn-icon{font-size:20px;line-height:1}
+@media(max-width:768px){.sidebar{display:none}.main{margin-left:0;padding:12px 10px 80px 10px}.stats-row{grid-template-columns:1fr 1fr}.form-grid-2,.form-grid-3{grid-template-columns:1fr}.grid-2{grid-template-columns:1fr}.summary-grid{grid-template-columns:1fr 1fr}.modal{width:96vw;max-height:92vh;padding:16px}.page-title{font-size:17px}.share-row{grid-template-columns:1fr 60px 60px 28px;gap:4px}.bottom-nav{display:flex}table{font-size:12px}th,td{padding:6px 4px}}
+@media(min-width:769px){.bottom-nav{display:none}}
 </style>
 </head>
 <body>
 
+<!-- Login -->
 <div class="pw-overlay" id="pw-overlay">
   <div class="pw-box">
     <div style="font-size:40px;margin-bottom:8px;">⚽</div>
@@ -164,8 +95,9 @@ tbody td { padding:10px 12px; }
   </div>
 </div>
 
+<!-- Sidebar -->
 <div class="sidebar">
-  <div class="logo"><div class="logo-text">⚽ 球帳系統</div><div class="logo-sub">管理 · 結算 · 對帳</div></div>
+  <div class="logo"><div class="logo-text">⚽ 球帳系統</div><div class="logo-sub">球類 · 百家樂 · 539</div></div>
   <nav class="nav">
     <div class="nav-item active" onclick="goPage('dashboard')" data-nav="dashboard"><span class="nav-icon">📊</span>總覽</div>
     <div class="nav-item" onclick="goPage('accounts')" data-nav="accounts"><span class="nav-icon">📋</span>帳號管理</div>
@@ -183,6 +115,7 @@ tbody td { padding:10px 12px; }
   </div>
 </div>
 
+<!-- Main -->
 <div class="main">
 
 <div class="page active" id="page-dashboard">
@@ -201,8 +134,11 @@ tbody td { padding:10px 12px; }
 
 <div class="page" id="page-accounts">
   <div class="page-header">
-    <div><div class="page-title">📋 帳號管理</div><div class="page-sub">設定每條線的上下家、水數、股東佔成</div></div>
+    <div><div class="page-title">📋 帳號管理</div><div class="page-sub">設定每條線的分類、上下家、水數、股東佔成</div></div>
     <button class="btn btn-primary" onclick="openAccountModal()">＋ 新增帳號</button>
+  </div>
+  <div class="filter-bar mb-16">
+    <select id="acc-cat-filter" onchange="renderAccounts()"><option value="">全部分類</option><option value="ball">⚽ 球類</option><option value="bac">🎴 百家樂</option><option value="539">🔢 539</option></select>
   </div>
   <div id="accounts-list"></div>
 </div>
@@ -218,8 +154,9 @@ tbody td { padding:10px 12px; }
 <div class="page" id="page-records">
   <div class="page-header">
     <div><div class="page-title">📝 輸贏記錄</div><div class="page-sub">每週記錄各帳號的輸贏與流水</div></div>
-    <div class="btn-row">
-      <select id="records-week-filter" onchange="renderRecords()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:7px 12px;font-size:13px;outline:none;min-width:200px;"></select>
+    <div class="filter-bar">
+      <select id="records-week-filter" onchange="renderRecords()"></select>
+      <select id="records-cat-filter" onchange="renderRecords()"><option value="">全部</option><option value="ball">⚽球類</option><option value="bac">🎴百家</option><option value="539">🔢539</option></select>
       <button class="btn btn-primary" onclick="openRecordModal()">＋ 新增記錄</button>
     </div>
   </div>
@@ -228,8 +165,11 @@ tbody td { padding:10px 12px; }
 
 <div class="page" id="page-settlement">
   <div class="page-header">
-    <div><div class="page-title">💰 每週結算</div><div class="page-sub">每週一結算，計算水錢、分成、應收應付</div></div>
-    <select id="settle-week-filter" onchange="renderSettlement()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:7px 12px;font-size:13px;outline:none;min-width:200px;"></select>
+    <div><div class="page-title">💰 每週結算</div><div class="page-sub">每週一結算</div></div>
+    <div class="filter-bar">
+      <select id="settle-week-filter" onchange="renderSettlement()"></select>
+      <select id="settle-cat-filter" onchange="renderSettlement()"><option value="">全部</option><option value="ball">⚽球類</option><option value="bac">🎴百家</option><option value="539">🔢539</option></select>
+    </div>
   </div>
   <div id="settlement-content"></div>
 </div>
@@ -237,28 +177,26 @@ tbody td { padding:10px 12px; }
 <div class="page" id="page-monthly">
   <div class="page-header">
     <div><div class="page-title">📅 月結利潤</div><div class="page-sub">月初結算上月利潤退水</div></div>
-    <select id="monthly-filter" onchange="renderMonthly()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:7px 12px;font-size:13px;outline:none;min-width:160px;"></select>
+    <select id="monthly-filter" onchange="renderMonthly()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:7px 12px;font-size:13px;outline:none;"></select>
   </div>
   <div id="monthly-content"></div>
 </div>
 
 <div class="page" id="page-verify">
   <div class="page-header">
-    <div><div class="page-title">✅ 對帳驗證</div><div class="page-sub">驗證每筆記錄：上家交收 ＝ 股東合計 ＋ 我的淨收</div></div>
-    <select id="verify-week-filter" onchange="renderVerify()" style="background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:7px 12px;font-size:13px;outline:none;min-width:200px;"></select>
+    <div><div class="page-title">✅ 對帳驗證</div><div class="page-sub">驗證收支平衡</div></div>
+    <div class="filter-bar">
+      <select id="verify-week-filter" onchange="renderVerify()"></select>
+      <select id="verify-cat-filter" onchange="renderVerify()"><option value="">全部</option><option value="ball">⚽球類</option><option value="bac">🎴百家</option><option value="539">🔢539</option></select>
+    </div>
   </div>
   <div id="verify-content"></div>
 </div>
 
 </div>
 
-<div class="bottom-nav" id="bottom-nav">
-  <div class="bottom-nav-item active" onclick="goPage('dashboard')" data-page="dashboard"><span class="bn-icon">📊</span><span>總覽</span></div>
-  <div class="bottom-nav-item" onclick="goPage('accounts')" data-page="accounts"><span class="bn-icon">📋</span><span>帳號</span></div>
-  <div class="bottom-nav-item" onclick="goPage('records')" data-page="records"><span class="bn-icon">📝</span><span>記錄</span></div>
-  <div class="bottom-nav-item" onclick="goPage('settlement')" data-page="settlement"><span class="bn-icon">💰</span><span>結算</span></div>
-  <div class="bottom-nav-item" onclick="showMoreMenu()" id="bn-more"><span class="bn-icon">☰</span><span>更多</span></div>
-</div>
+<!-- Bottom nav mobile -->
+<div class="bottom-nav"><div class="bottom-nav-item active" onclick="goPage('dashboard')" data-page="dashboard"><span class="bn-icon">📊</span><span>總覽</span></div><div class="bottom-nav-item" onclick="goPage('accounts')" data-page="accounts"><span class="bn-icon">📋</span><span>帳號</span></div><div class="bottom-nav-item" onclick="goPage('records')" data-page="records"><span class="bn-icon">📝</span><span>記錄</span></div><div class="bottom-nav-item" onclick="goPage('settlement')" data-page="settlement"><span class="bn-icon">💰</span><span>結算</span></div><div class="bottom-nav-item" onclick="showMoreMenu()" id="bn-more"><span class="bn-icon">☰</span><span>更多</span></div></div>
 <div id="more-menu" style="display:none;position:fixed;bottom:70px;right:10px;z-index:300;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:8px;min-width:160px;box-shadow:0 8px 24px rgba(0,0,0,.5);">
   <div class="nav-item" onclick="goPage('contacts');hideMoreMenu()"><span class="nav-icon">👥</span>聯絡人</div>
   <div class="nav-item" onclick="goPage('monthly');hideMoreMenu()"><span class="nav-icon">📅</span>月結利潤</div>
@@ -274,31 +212,43 @@ tbody td { padding:10px 12px; }
 <div class="overlay" id="modal-account">
   <div class="modal" style="max-width:700px;">
     <div class="modal-title">📋 帳號設定</div>
-    <div class="form-grid form-grid-2 mb-16">
+    <div class="form-grid form-grid-3 mb-16">
       <div class="form-group"><label>帳號名稱</label><input id="acc-name" placeholder="例：A線"></div>
+      <div class="form-group"><label>分類</label>
+        <select id="acc-category" onchange="onAccCategoryChange()">
+          <option value="ball">⚽ 球類</option>
+          <option value="bac">🎴 百家樂</option>
+          <option value="539">🔢 539</option>
+        </select>
+      </div>
       <div class="form-group"><label>角色</label>
         <select id="acc-role" onchange="onAccRoleChange()">
-          <option value="middle">中間人（有上下家）</option>
-          <option value="banker">莊家（自己吃單）</option>
+          <option value="middle">中間人</option>
+          <option value="banker">莊家</option>
         </select>
       </div>
     </div>
-    <div id="acc-upper-section">
-      <div style="font-size:12px;font-weight:700;color:var(--accent2);margin-bottom:8px;letter-spacing:.5px;">▲ 上家設定</div>
-      <div class="form-grid form-grid-3 mb-16">
-        <div class="form-group"><label>上家名稱</label><input id="acc-upper-name" placeholder="上家名稱"></div>
-        <div class="form-group"><label>交收比例 %</label><input id="acc-upper-pct" type="number" placeholder="50" min="0" max="100" oninput="checkAccPct()"></div>
-        <div class="form-group"><label>退水數（0=不退）</label><input id="acc-upper-water" type="number" placeholder="115" min="0"></div>
+    <!-- 539 不需要上家/股東設定 -->
+    <div id="acc-detail-section">
+      <div id="acc-upper-section">
+        <div style="font-size:12px;font-weight:700;color:var(--accent2);margin-bottom:8px;">▲ 上家設定</div>
+        <div class="form-grid form-grid-3 mb-16" id="acc-upper-fields">
+          <div class="form-group"><label>上家名稱</label><input id="acc-upper-name" placeholder="上家名稱"></div>
+          <div class="form-group"><label>交收比例 %</label><input id="acc-upper-pct" type="number" placeholder="50" min="0" max="100" oninput="checkAccPct()"></div>
+          <div class="form-group" id="acc-upper-water-group"><label id="acc-upper-water-label">退水數（0=不退）</label><input id="acc-upper-water" type="number" placeholder="115" min="0"></div>
+        </div>
       </div>
-    </div>
-    <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:8px;letter-spacing:.5px;">▼ 下家 / 股東分成</div>
-    <div class="text-sm mb-12">設定名稱、佔成比例、退水數。所有人比例合計應為 100%。</div>
-    <div id="acc-shares"></div>
-    <button class="btn btn-ghost btn-sm mt-8 mb-16" onclick="addAccShare()">＋ 新增股東/下家</button>
-    <div style="font-size:12px;font-weight:700;color:var(--yellow);margin-bottom:8px;letter-spacing:.5px;">📊 後統分單成本</div>
-    <div class="form-grid form-grid-2 mb-12">
-      <div class="form-group"><label>後統成本比例 %</label><input id="acc-backend-pct" type="number" value="5.5" step="0.1" min="0"></div>
-      <div class="form-group"><label>基準水數（差額水計算基準）</label><input id="acc-base-water" type="number" placeholder="100" min="0"></div>
+      <div style="font-size:12px;font-weight:700;color:var(--accent);margin-bottom:8px;">▼ 下家 / 股東分成</div>
+      <div class="text-sm mb-12">設定名稱、佔成比例、退水數。所有人比例合計應為 100%。</div>
+      <div id="acc-shares"></div>
+      <button class="btn btn-ghost btn-sm mt-8 mb-16" onclick="addAccShare()">＋ 新增股東/下家</button>
+      <div id="acc-backend-section">
+        <div style="font-size:12px;font-weight:700;color:var(--yellow);margin-bottom:8px;">📊 後統分單成本</div>
+        <div class="form-grid form-grid-2 mb-12">
+          <div class="form-group"><label>後統成本比例 %</label><input id="acc-backend-pct" type="number" value="5.5" step="0.1" min="0"></div>
+          <div class="form-group"><label>基準水數</label><input id="acc-base-water" type="number" placeholder="100" min="0"></div>
+        </div>
+      </div>
     </div>
     <div id="acc-pct-check" class="verify-row" style="display:none;"></div>
     <div class="modal-actions">
@@ -325,13 +275,30 @@ tbody td { padding:10px 12px; }
 
 <!-- Record Modal -->
 <div class="overlay" id="modal-record">
-  <div class="modal" style="max-width:520px;">
-    <div class="modal-title">📝 輸贏記錄</div>
+  <div class="modal" style="max-width:560px;">
+    <div class="modal-title">📝 新增記錄</div>
     <div class="form-grid mb-12">
-      <div class="form-group"><label>帳號</label><select id="rec-account" onchange="previewRecord()"></select></div>
-      <div class="form-grid form-grid-2">
-        <div class="form-group"><label>輸贏金額（客戶輸為負）</label><input id="rec-result" type="number" placeholder="-10000" oninput="previewRecord()"></div>
-        <div class="form-group"><label>流水金額</label><input id="rec-turnover" type="number" placeholder="100000" oninput="previewRecord()"></div>
+      <div class="form-group"><label>帳號</label><select id="rec-account" onchange="onRecAccountChange()"></select></div>
+      <div id="rec-category-hint" class="mb-8" style="display:none;"></div>
+      <!-- ball fields -->
+      <div id="rec-fields-ball" style="display:none;">
+        <div class="form-grid form-grid-2 mb-12">
+          <div class="form-group"><label>輸贏金額（客戶輸為負）</label><input id="rec-ball-result" type="number" placeholder="-10000" oninput="previewRecord()"></div>
+          <div class="form-group"><label>水錢金額（正數）</label><input id="rec-ball-water" type="number" placeholder="1500" min="0" oninput="previewRecord()"></div>
+        </div>
+      </div>
+      <!-- bac fields -->
+      <div id="rec-fields-bac" style="display:none;">
+        <div class="form-grid form-grid-2 mb-12">
+          <div class="form-group"><label>輸贏金額（客戶輸為負）</label><input id="rec-bac-result" type="number" placeholder="-10000" oninput="previewRecord()"></div>
+          <div class="form-group"><label>流水金額</label><input id="rec-bac-turnover" type="number" placeholder="100000" min="0" oninput="previewRecord()"></div>
+        </div>
+      </div>
+      <!-- 539 fields -->
+      <div id="rec-fields-539" style="display:none;">
+        <div class="form-grid mb-12">
+          <div class="form-group"><label>交收金額（正數=我收，負數=我付）</label><input id="rec-539-amount" type="number" placeholder="-5000" oninput="previewRecord()"></div>
+        </div>
       </div>
       <div class="form-group"><label>週次</label><select id="rec-week"></select></div>
       <div class="form-group"><label>備註</label><input id="rec-note" placeholder="選填"></div>
@@ -375,67 +342,48 @@ tbody td { padding:10px 12px; }
 <div class="toast" id="toast-el"></div>
 
 <script>
-// ═══════════════════════════ DATA ═══════════════════════════
-let DB = { contacts:[], accounts:[], records:[] };
-let _editAccountId = null, _editRecordId = null, _editContactId = null, _accShares = [];
+// ═══════════════ DATA ═══════════════
+let DB={contacts:[],accounts:[],records:[]};
+let _editAccountId=null,_editRecordId=null,_editContactId=null,_accShares=[];
+const CATS={ball:{icon:'⚽',label:'球類',cls:'cat-ball'},bac:{icon:'🎴',label:'百家樂',cls:'cat-bac'},'539':{icon:'🔢',label:'539',cls:'cat-539'}};
+function catTag(cat){const c=CATS[cat]||CATS.ball;return `<span class="cat-tag ${c.cls}">${c.icon} ${c.label}</span>`;}
 
-// ═══════════════════════════ UTILS ═══════════════════════════
-const uid = () => Date.now().toString(36)+Math.random().toString(36).slice(2,6);
-const fmt = n => (n>=0?'+':'')+Math.round(n).toLocaleString();
-const fmtAbs = n => Math.abs(Math.round(n)).toLocaleString();
-function toast(msg) { const el=document.getElementById('toast-el'); el.textContent=msg; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),2500); }
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-function openModal(id) { document.getElementById(id).classList.add('open'); }
-function calcWater(turnover, waterNum) { return (!waterNum||waterNum<=0) ? 0 : turnover/10000*waterNum; }
+// ═══════════════ UTILS ═══════════════
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const fmt=n=>(n>=0?'+':'')+Math.round(n).toLocaleString();
+const fmtAbs=n=>Math.abs(Math.round(n)).toLocaleString();
+function toast(msg){const el=document.getElementById('toast-el');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2500);}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+function openModal(id){document.getElementById(id).classList.add('open');}
+function calcWater(turnover,waterNum){return(!waterNum||waterNum<=0)?0:turnover/10000*waterNum;}
+function getWeekLabel(date){const d=new Date(date);const day=d.getDay();const diff=d.getDate()-day+(day===0?-6:1);const mon=new Date(d.setDate(diff));return `${mon.getFullYear()}-${String(mon.getMonth()+1).padStart(2,'0')}-${String(mon.getDate()).padStart(2,'0')}`;}
+function getWeekDisplay(wl){const d=new Date(wl);const s=new Date(d);s.setDate(d.getDate()+6);return `${d.getMonth()+1}/${d.getDate()}~${s.getMonth()+1}/${s.getDate()}`;}
+function getCurrentWeek(){return getWeekLabel(new Date());}
+function getMonthLabel(date){const d=new Date(date);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;}
 
-// Week: Monday-based
-function getWeekLabel(date) {
-  const d=new Date(date); const day=d.getDay(); const diff=d.getDate()-day+(day===0?-6:1);
-  const mon=new Date(d.setDate(diff));
-  return `${mon.getFullYear()}-${String(mon.getMonth()+1).padStart(2,'0')}-${String(mon.getDate()).padStart(2,'0')}`;
-}
-function getWeekDisplay(wl) { const d=new Date(wl); const s=new Date(d); s.setDate(d.getDate()+6); return `${d.getMonth()+1}/${d.getDate()} ~ ${s.getMonth()+1}/${s.getDate()}`; }
-function getCurrentWeek() { return getWeekLabel(new Date()); }
-function getMonthLabel(date) { const d=new Date(date); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`; }
-
-// ═══════════════════════════ NAV ═══════════════════════════
-function goPage(name) {
+// ═══════════════ NAV ═══════════════
+function goPage(name){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  const el=document.getElementById('page-'+name); if(el) el.classList.add('active');
+  const el=document.getElementById('page-'+name);if(el)el.classList.add('active');
   document.querySelectorAll('.sidebar .nav-item').forEach(n=>n.classList.toggle('active',n.dataset.nav===name));
   document.querySelectorAll('.bottom-nav-item').forEach(n=>n.classList.toggle('active',n.dataset.page===name));
-  const renderers={dashboard:renderDashboard,accounts:renderAccounts,contacts:renderContacts,records:renderRecords,settlement:renderSettlement,monthly:renderMonthly,verify:renderVerify};
-  if(renderers[name]) renderers[name]();
+  ({dashboard:renderDashboard,accounts:renderAccounts,contacts:renderContacts,records:renderRecords,settlement:renderSettlement,monthly:renderMonthly,verify:renderVerify})[name]?.();
 }
-function showMoreMenu() { const m=document.getElementById('more-menu'); m.style.display=m.style.display==='block'?'none':'block'; }
-function hideMoreMenu() { document.getElementById('more-menu').style.display='none'; }
-document.addEventListener('click',e=>{ if(!e.target.closest('#more-menu')&&!e.target.closest('#bn-more')) hideMoreMenu(); });
+function showMoreMenu(){const m=document.getElementById('more-menu');m.style.display=m.style.display==='block'?'none':'block';}
+function hideMoreMenu(){document.getElementById('more-menu').style.display='none';}
+document.addEventListener('click',e=>{if(!e.target.closest('#more-menu')&&!e.target.closest('#bn-more'))hideMoreMenu();});
 
-// ═══════════════════════════ CONTACTS ═══════════════════════════
-function openContactModal(id) {
-  _editContactId=id||null; const ct=id?DB.contacts.find(c=>c.id===id):null;
-  document.getElementById('ct-name').value=ct?ct.name:'';
-  document.getElementById('ct-note').value=ct?ct.note||'':'';
-  openModal('modal-contact');
-}
-function saveContact() {
-  const name=document.getElementById('ct-name').value.trim();
-  if(!name){toast('請填寫名稱');return;}
-  if(_editContactId){const ct=DB.contacts.find(c=>c.id===_editContactId);if(ct){ct.name=name;ct.note=document.getElementById('ct-note').value.trim();}}
-  else DB.contacts.push({id:uid(),name,note:document.getElementById('ct-note').value.trim()});
-  save();closeModal('modal-contact');renderContacts();toast('✅ 已儲存');
-}
+// ═══════════════ CONTACTS ═══════════════
+function openContactModal(id){_editContactId=id||null;const ct=id?DB.contacts.find(c=>c.id===id):null;document.getElementById('ct-name').value=ct?ct.name:'';document.getElementById('ct-note').value=ct?ct.note||'':'';openModal('modal-contact');}
+function saveContact(){const name=document.getElementById('ct-name').value.trim();if(!name){toast('請填寫名稱');return;}if(_editContactId){const ct=DB.contacts.find(c=>c.id===_editContactId);if(ct){ct.name=name;ct.note=document.getElementById('ct-note').value.trim();}}else DB.contacts.push({id:uid(),name,note:document.getElementById('ct-note').value.trim()});save();closeModal('modal-contact');renderContacts();toast('✅ 已儲存');}
 function deleteContact(id){if(!confirm('確定刪除？'))return;DB.contacts=DB.contacts.filter(c=>c.id!==id);save();renderContacts();toast('已刪除');}
-function renderContacts() {
-  const el=document.getElementById('contacts-list');
-  if(!DB.contacts.length){el.innerHTML='<div class="empty-state">尚無聯絡人</div>';return;}
-  el.innerHTML=`<div class="card"><div class="table-wrap"><table><thead><tr><th>名稱</th><th>備註</th><th style="width:100px;"></th></tr></thead><tbody>${DB.contacts.map(c=>`<tr><td style="font-weight:600;">${c.name}</td><td style="color:var(--text3);">${c.note||'-'}</td><td><div class="btn-row"><button class="btn btn-ghost btn-xs" onclick="openContactModal('${c.id}')">編輯</button><button class="btn btn-danger btn-xs" onclick="deleteContact('${c.id}')">刪除</button></div></td></tr>`).join('')}</tbody></table></div></div>`;
-}
+function renderContacts(){const el=document.getElementById('contacts-list');if(!DB.contacts.length){el.innerHTML='<div class="empty-state">尚無聯絡人</div>';return;}el.innerHTML=`<div class="card"><div class="table-wrap"><table><thead><tr><th>名稱</th><th>備註</th><th style="width:100px;"></th></tr></thead><tbody>${DB.contacts.map(c=>`<tr><td style="font-weight:600;">${c.name}</td><td style="color:var(--text3);">${c.note||'-'}</td><td><div class="btn-row"><button class="btn btn-ghost btn-xs" onclick="openContactModal('${c.id}')">編輯</button><button class="btn btn-danger btn-xs" onclick="deleteContact('${c.id}')">刪除</button></div></td></tr>`).join('')}</tbody></table></div></div>`;}
 
-// ═══════════════════════════ ACCOUNTS ═══════════════════════════
-function openAccountModal(id) {
-  _editAccountId=id||null; const acc=id?DB.accounts.find(a=>a.id===id):null;
+// ═══════════════ ACCOUNTS ═══════════════
+function openAccountModal(id){
+  _editAccountId=id||null;const acc=id?DB.accounts.find(a=>a.id===id):null;
   document.getElementById('acc-name').value=acc?acc.name:'';
+  document.getElementById('acc-category').value=acc?acc.category||'ball':'ball';
   document.getElementById('acc-role').value=acc?acc.role:'middle';
   document.getElementById('acc-upper-name').value=acc&&acc.upper?acc.upper.name:'';
   document.getElementById('acc-upper-pct').value=acc&&acc.upper?acc.upper.pct:'';
@@ -443,304 +391,368 @@ function openAccountModal(id) {
   document.getElementById('acc-backend-pct').value=acc?(acc.backendPct!=null?acc.backendPct:5.5):5.5;
   document.getElementById('acc-base-water').value=acc?(acc.baseWater||100):100;
   _accShares=acc&&acc.shares?JSON.parse(JSON.stringify(acc.shares)):[];
-  onAccRoleChange();renderAccShares();checkAccPct();openModal('modal-account');
+  onAccCategoryChange();onAccRoleChange();renderAccShares();checkAccPct();openModal('modal-account');
+}
+function onAccCategoryChange(){
+  const cat=document.getElementById('acc-category').value;
+  const detail=document.getElementById('acc-detail-section');
+  const backend=document.getElementById('acc-backend-section');
+  if(cat==='539'){detail.style.display='none';}
+  else{detail.style.display='block';backend.style.display=cat==='bac'?'block':'none';}
+  // Ball: water label is "退水數"  Bac: water label
+  if(cat==='ball'){
+    document.getElementById('acc-upper-water-label').textContent='退水數（直接輸入水錢金額）';
+  }else{
+    document.getElementById('acc-upper-water-label').textContent='退水數（0=不退）';
+  }
 }
 function onAccRoleChange(){document.getElementById('acc-upper-section').style.display=document.getElementById('acc-role').value==='middle'?'block':'none';checkAccPct();}
 function addAccShare(){_accShares.push({name:'',pct:0,water:0});renderAccShares();}
 function removeAccShare(i){_accShares.splice(i,1);renderAccShares();checkAccPct();}
-function renderAccShares() {
-  document.getElementById('acc-shares').innerHTML=_accShares.map((s,i)=>`<div class="share-row">
-    <input placeholder="名稱" value="${s.name}" onchange="_accShares[${i}].name=this.value" style="text-align:left;">
-    <input type="number" placeholder="佔%" value="${s.pct||''}" min="0" max="100" onchange="_accShares[${i}].pct=parseFloat(this.value)||0;checkAccPct()" style="font-family:'JetBrains Mono',monospace;">
-    <input type="number" placeholder="水數" value="${s.water||''}" min="0" onchange="_accShares[${i}].water=parseFloat(this.value)||0" style="font-family:'JetBrains Mono',monospace;">
-    <button class="icon-btn" onclick="removeAccShare(${i})" title="刪除">✕</button>
-  </div>`).join('');
+function renderAccShares(){
+  const cat=document.getElementById('acc-category').value;
+  const waterLabel=cat==='ball'?'水數':'水數';
+  document.getElementById('acc-shares').innerHTML=_accShares.map((s,i)=>`<div class="share-row"><input placeholder="名稱" value="${s.name}" onchange="_accShares[${i}].name=this.value" style="text-align:left;"><input type="number" placeholder="佔%" value="${s.pct||''}" min="0" max="100" onchange="_accShares[${i}].pct=parseFloat(this.value)||0;checkAccPct()" style="font-family:'JetBrains Mono',monospace;"><input type="number" placeholder="${waterLabel}" value="${s.water||''}" min="0" onchange="_accShares[${i}].water=parseFloat(this.value)||0" style="font-family:'JetBrains Mono',monospace;"><button class="icon-btn" onclick="removeAccShare(${i})">✕</button></div>`).join('');
 }
-function checkAccPct() {
+function checkAccPct(){
+  const cat=document.getElementById('acc-category').value;
+  if(cat==='539'){document.getElementById('acc-pct-check').style.display='none';return;}
   const role=document.getElementById('acc-role').value;
   const up=role==='middle'?(parseFloat(document.getElementById('acc-upper-pct').value)||0):0;
-  const sp=_accShares.reduce((s,x)=>s+(x.pct||0),0);
-  const total=up+sp; const el=document.getElementById('acc-pct-check'); el.style.display='flex';
+  const sp=_accShares.reduce((s,x)=>s+(x.pct||0),0);const total=up+sp;
+  const el=document.getElementById('acc-pct-check');el.style.display='flex';
   if(Math.abs(total-100)<0.01){el.className='verify-row verify-ok';el.innerHTML=`✅ 比例合計 ${total}%（正確）`;}
-  else{el.className='verify-row verify-err';el.innerHTML=`⚠️ 比例合計 ${total}%（上家${up}% + 股東${sp}%）— 應為 100%`;}
+  else{el.className='verify-row verify-err';el.innerHTML=`⚠️ 合計 ${total}%（上家${up}%＋股東${sp}%）— 應為100%`;}
 }
-function saveAccount() {
-  const name=document.getElementById('acc-name').value.trim();
-  if(!name){toast('請填寫帳號名稱');return;}
+function saveAccount(){
+  const name=document.getElementById('acc-name').value.trim();if(!name){toast('請填寫名稱');return;}
+  const cat=document.getElementById('acc-category').value;
   const role=document.getElementById('acc-role').value;
-  const acc={id:_editAccountId||uid(),name,role,
-    upper:role==='middle'?{name:document.getElementById('acc-upper-name').value.trim(),pct:parseFloat(document.getElementById('acc-upper-pct').value)||0,water:parseFloat(document.getElementById('acc-upper-water').value)||0}:null,
-    shares:_accShares.filter(s=>s.name.trim()),
-    backendPct:parseFloat(document.getElementById('acc-backend-pct').value)||0,
-    baseWater:parseFloat(document.getElementById('acc-base-water').value)||100};
+  const acc={id:_editAccountId||uid(),name,category:cat,role,
+    upper:(cat!=='539'&&role==='middle')?{name:document.getElementById('acc-upper-name').value.trim(),pct:parseFloat(document.getElementById('acc-upper-pct').value)||0,water:parseFloat(document.getElementById('acc-upper-water').value)||0}:null,
+    shares:cat!=='539'?_accShares.filter(s=>s.name.trim()):[],
+    backendPct:cat==='bac'?(parseFloat(document.getElementById('acc-backend-pct').value)||0):0,
+    baseWater:cat==='bac'?(parseFloat(document.getElementById('acc-base-water').value)||100):0};
   if(_editAccountId){const i=DB.accounts.findIndex(a=>a.id===_editAccountId);if(i>=0)DB.accounts[i]=acc;}else DB.accounts.push(acc);
   save();closeModal('modal-account');renderAccounts();toast('✅ 已儲存');
 }
 function deleteAccount(id){if(!confirm('確定刪除？'))return;DB.accounts=DB.accounts.filter(a=>a.id!==id);save();renderAccounts();toast('已刪除');}
-function renderAccounts() {
+function renderAccounts(){
+  const filter=document.getElementById('acc-cat-filter').value;
+  const list=DB.accounts.filter(a=>!filter||a.category===filter);
   const el=document.getElementById('accounts-list');
-  if(!DB.accounts.length){el.innerHTML='<div class="empty-state">尚無帳號，點擊上方按鈕新增</div>';return;}
-  el.innerHTML=DB.accounts.map(acc=>{
-    const role=acc.role==='middle'?'<span class="badge badge-blue">中間人</span>':'<span class="badge badge-yellow">莊家</span>';
+  if(!list.length){el.innerHTML='<div class="empty-state">尚無帳號</div>';return;}
+  el.innerHTML=list.map(acc=>{
+    const cat=acc.category||'ball';
+    const roleTag=acc.role==='middle'?'<span class="badge badge-blue">中間人</span>':'<span class="badge badge-yellow">莊家</span>';
     const up=acc.upper?`<div class="text-sm mt-8">▲ 上家：<strong>${acc.upper.name||'未設定'}</strong>（${acc.upper.pct}%，水 ${acc.upper.water}）</div>`:'';
     const sh=(acc.shares||[]).map(s=>`<span class="badge badge-green" style="margin:2px;">${s.name} ${s.pct}% 水${s.water}</span>`).join(' ');
-    const myPct=100-(acc.upper?acc.upper.pct:0)-(acc.shares||[]).reduce((s,x)=>s+x.pct,0);
+    const myPct=cat==='539'?'-':(100-(acc.upper?acc.upper.pct:0)-(acc.shares||[]).reduce((s,x)=>s+x.pct,0))+'%';
+    const extra=cat==='bac'?`<span class="badge badge-yellow" style="font-size:10px;">後統${acc.backendPct}% 基準水${acc.baseWater}</span>`:'';
     return `<div class="card mb-12"><div class="flex-between" style="flex-wrap:wrap;gap:8px;">
-      <div><div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap;"><span style="font-weight:700;font-size:15px;">${acc.name}</span> ${role} <span class="badge badge-yellow" style="font-size:10px;">後統${acc.backendPct||5.5}% 基準水${acc.baseWater||100}</span> <span class="text-sm">我佔 ${myPct}%</span></div>
-      ${up}<div style="margin-top:4px;">▼ ${sh||'<span class="text-sm">尚無股東</span>'}</div></div>
-      <div class="btn-row"><button class="btn btn-ghost btn-sm" onclick="openAccountModal('${acc.id}')">編輯</button><button class="btn btn-danger btn-sm" onclick="deleteAccount('${acc.id}')">刪除</button></div>
+      <div><div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap;">${catTag(cat)} <span style="font-weight:700;font-size:15px;">${acc.name}</span> ${roleTag} ${extra} ${cat!=='539'?`<span class="text-sm">我佔 ${myPct}</span>`:''}</div>
+      ${cat!=='539'?`${up}<div style="margin-top:4px;">▼ ${sh||'<span class="text-sm">尚無股東</span>'}</div>`:'<div class="text-sm">539 直接交收金額</div>'}
+      </div><div class="btn-row"><button class="btn btn-ghost btn-sm" onclick="openAccountModal('${acc.id}')">編輯</button><button class="btn btn-danger btn-sm" onclick="deleteAccount('${acc.id}')">刪除</button></div>
     </div></div>`;
   }).join('');
 }
 
-// ═══════════════════════════ CORE CALC ═══════════════════════════
-function calcRecord(acc, result, turnover) {
-  // (輸贏 + 該人的水) × 該人的比例
-  let upper=null;
-  if(acc.role==='middle'&&acc.upper){
-    const water=calcWater(turnover,acc.upper.water);
-    const amount=(result+water)*(acc.upper.pct/100);
-    upper={name:acc.upper.name||'上家',pct:acc.upper.pct,water,amount,waterNum:acc.upper.water};
-  }
-  const shares=(acc.shares||[]).map(s=>{
-    const water=calcWater(turnover,s.water);
-    const amount=(result+water)*(s.pct/100);
-    return {name:s.name,pct:s.pct,water,amount,waterNum:s.water};
-  });
-  // upper.amount: (result+water)*pct. If client loses (result<0), amount is negative.
-  // Negative amount from upper = upper pays me. So I receive = -upper.amount
-  // Negative amount from share = I pay them. So I pay = -share.amount (but stored as what they get)
-  const upperNet=upper?-upper.amount:0;
-  const sharesNet=shares.reduce((s,x)=>s+(-x.amount),0);
-  const myNet=upperNet-sharesNet;
+// ═══════════════ CORE CALC ═══════════════
+// Returns { upper, shares, myNet, waterIncome } based on category
+function calcRecord(acc, rec) {
+  const cat=acc.category||'ball';
   
-  // Water profit from difference
-  let waterProfit=0;
-  if(acc.upper){
-    const baseWater=acc.baseWater||100;
-    // Diff between what upper gives me in water vs what I give shares at base water
-    // This is already embedded in myNet, just calculate it for display
-    const upperWaterTotal=calcWater(turnover,acc.upper.water);
-    const avgShareWater=shares.length>0?shares.reduce((s,x)=>s+x.water,0)/shares.length:0;
-    // Actually, the diff is just naturally in myNet. Let's compute explicit water profit:
-    // For each share, if their water < upper water, the difference * their pct is my extra
-    shares.forEach(s=>{
-      const diff=calcWater(turnover,acc.upper.water)-calcWater(turnover,s.waterNum);
-      if(diff>0) waterProfit+=diff*(s.pct/100);
+  // ── 539: direct amount ──
+  if(cat==='539'){
+    return {upper:null,shares:[],myNet:rec.amount||0,waterIncome:0};
+  }
+  
+  // ── BALL: 上家交收輸贏，股東交收(輸贏+水)*比例，水歸我 ──
+  if(cat==='ball'){
+    const result=rec.result||0;
+    const waterAmount=rec.waterAmount||0; // 直接輸入的水錢金額
+    let upper=null;
+    if(acc.role==='middle'&&acc.upper){
+      // 上家只交收輸贏
+      const amount=result*(acc.upper.pct/100);
+      upper={name:acc.upper.name||'上家',pct:acc.upper.pct,water:0,amount,waterNum:0};
+    }
+    const shares=(acc.shares||[]).map(s=>{
+      // 股東交收(輸贏+水)*比例
+      const amount=(result+waterAmount)*(s.pct/100);
+      return {name:s.name,pct:s.pct,water:waterAmount*(s.pct/100),amount,waterNum:s.water};
     });
+    const upperNet=upper?-upper.amount:0; // upper pays me
+    const sharesNet=shares.reduce((s,x)=>s+(-x.amount),0); // I pay shares
+    // Water is my income (退在我身上)
+    const myNet=upperNet-sharesNet;
+    return {upper,shares,myNet,waterIncome:waterAmount,result,waterAmount};
   }
   
-  return {upper,shares,myNet,waterProfit,upperNet,sharesNet};
+  // ── BAC: 所有人 (輸贏+各自水)*比例 ──
+  if(cat==='bac'){
+    const result=rec.result||0;
+    const turnover=rec.turnover||0;
+    let upper=null;
+    if(acc.role==='middle'&&acc.upper){
+      const water=calcWater(turnover,acc.upper.water);
+      const amount=(result+water)*(acc.upper.pct/100);
+      upper={name:acc.upper.name||'上家',pct:acc.upper.pct,water,amount,waterNum:acc.upper.water};
+    }
+    const shares=(acc.shares||[]).map(s=>{
+      const water=calcWater(turnover,s.water);
+      const amount=(result+water)*(s.pct/100);
+      return {name:s.name,pct:s.pct,water,amount,waterNum:s.water};
+    });
+    const upperNet=upper?-upper.amount:0;
+    const sharesNet=shares.reduce((s,x)=>s+(-x.amount),0);
+    const myNet=upperNet-sharesNet;
+    let waterProfit=0;
+    if(acc.upper){shares.forEach(s=>{const diff=calcWater(turnover,acc.upper.water)-calcWater(turnover,s.waterNum);if(diff>0)waterProfit+=diff*(s.pct/100);});}
+    return {upper,shares,myNet,waterIncome:waterProfit,result,turnover};
+  }
+  return {upper:null,shares:[],myNet:0,waterIncome:0};
 }
 
-// ═══════════════════════════ RECORDS ═══════════════════════════
-function populateWeekSelects() {
+// ═══════════════ RECORDS ═══════════════
+function populateWeekSelects(){
   const weeks=[...new Set(DB.records.map(r=>r.week))].sort().reverse();
-  const cw=getCurrentWeek(); if(!weeks.includes(cw)) weeks.unshift(cw);
+  const cw=getCurrentWeek();if(!weeks.includes(cw))weeks.unshift(cw);
   const opts=weeks.map(w=>`<option value="${w}">${getWeekDisplay(w)} (${w})</option>`).join('');
   ['records-week-filter','settle-week-filter','verify-week-filter'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=opts;});
   const months=[...new Set(DB.records.map(r=>r.week.slice(0,7)))].sort().reverse();
-  const cm=getMonthLabel(new Date()); if(!months.includes(cm)) months.unshift(cm);
-  const mEl=document.getElementById('monthly-filter'); if(mEl) mEl.innerHTML=months.map(m=>`<option value="${m}">${m}</option>`).join('');
+  const cm=getMonthLabel(new Date());if(!months.includes(cm))months.unshift(cm);
+  const mEl=document.getElementById('monthly-filter');if(mEl)mEl.innerHTML=months.map(m=>`<option value="${m}">${m}</option>`).join('');
 }
-function openRecordModal(id) {
-  _editRecordId=id||null; const rec=id?DB.records.find(r=>r.id===id):null;
+function openRecordModal(id){
+  _editRecordId=id||null;const rec=id?DB.records.find(r=>r.id===id):null;
   const accSel=document.getElementById('rec-account');
-  accSel.innerHTML=DB.accounts.map(a=>`<option value="${a.id}">${a.name}</option>`).join('');
-  if(rec) accSel.value=rec.accountId;
-  document.getElementById('rec-result').value=rec?rec.result:'';
-  document.getElementById('rec-turnover').value=rec?rec.turnover:'';
+  accSel.innerHTML=DB.accounts.map(a=>`<option value="${a.id}">${(CATS[a.category||'ball']?.icon||'') +' '+ a.name}</option>`).join('');
+  if(rec)accSel.value=rec.accountId;
+  // Fill fields
+  document.getElementById('rec-ball-result').value=rec?rec.result||'':'';
+  document.getElementById('rec-ball-water').value=rec?rec.waterAmount||'':'';
+  document.getElementById('rec-bac-result').value=rec?rec.result||'':'';
+  document.getElementById('rec-bac-turnover').value=rec?rec.turnover||'':'';
+  document.getElementById('rec-539-amount').value=rec?rec.amount||'':'';
   document.getElementById('rec-note').value=rec?rec.note||'':'';
   const weekSel=document.getElementById('rec-week');
   const weeks=[...new Set(DB.records.map(r=>r.week))].sort().reverse();
-  const cw=getCurrentWeek(); if(!weeks.includes(cw)) weeks.unshift(cw);
+  const cw=getCurrentWeek();if(!weeks.includes(cw))weeks.unshift(cw);
   weekSel.innerHTML=weeks.map(w=>`<option value="${w}">${getWeekDisplay(w)}</option>`).join('');
-  if(rec) weekSel.value=rec.week;
-  document.getElementById('rec-preview').style.display='none';
-  openModal('modal-record');
+  if(rec)weekSel.value=rec.week;
+  onRecAccountChange();openModal('modal-record');
 }
-function previewRecord() {
+function onRecAccountChange(){
   const accId=document.getElementById('rec-account').value;
-  const result=parseFloat(document.getElementById('rec-result').value)||0;
-  const turnover=parseFloat(document.getElementById('rec-turnover').value)||0;
+  const acc=DB.accounts.find(a=>a.id===accId);
+  const cat=acc?acc.category||'ball':'ball';
+  document.getElementById('rec-fields-ball').style.display=cat==='ball'?'block':'none';
+  document.getElementById('rec-fields-bac').style.display=cat==='bac'?'block':'none';
+  document.getElementById('rec-fields-539').style.display=cat==='539'?'block':'none';
+  const hint=document.getElementById('rec-category-hint');
+  hint.style.display='block';
+  hint.innerHTML=catTag(cat)+`<span class="text-sm" style="margin-left:8px;">${cat==='ball'?'輸入輸贏＋水錢金額':cat==='bac'?'輸入輸贏＋流水，自動算水':'直接輸入交收金額'}</span>`;
+  previewRecord();
+}
+function previewRecord(){
+  const accId=document.getElementById('rec-account').value;
   const acc=DB.accounts.find(a=>a.id===accId);
   const preview=document.getElementById('rec-preview');
-  if(!acc||(!result&&!turnover)){preview.style.display='none';return;}
+  if(!acc){preview.style.display='none';return;}
+  const cat=acc.category||'ball';
+  let rec={};
+  if(cat==='ball'){
+    rec.result=parseFloat(document.getElementById('rec-ball-result').value)||0;
+    rec.waterAmount=parseFloat(document.getElementById('rec-ball-water').value)||0;
+  }else if(cat==='bac'){
+    rec.result=parseFloat(document.getElementById('rec-bac-result').value)||0;
+    rec.turnover=parseFloat(document.getElementById('rec-bac-turnover').value)||0;
+  }else{
+    rec.amount=parseFloat(document.getElementById('rec-539-amount').value)||0;
+  }
+  if(cat==='539'&&!rec.amount){preview.style.display='none';return;}
+  if(cat!=='539'&&!rec.result){preview.style.display='none';return;}
   preview.style.display='block';
-  const calc=calcRecord(acc,result,turnover);
-  let html=`<div class="card-title">即時預覽</div><div class="text-sm mb-12">輸贏: ${fmt(result)} ｜ 流水: ${fmtAbs(turnover)}</div>`;
-  if(calc.upper) html+=`<div style="padding:4px 0;font-size:13px;"><span style="color:var(--accent2);">▲ ${calc.upper.name}</span> (${calc.upper.pct}%, 水${calc.upper.waterNum})：水錢 ${fmt(Math.round(calc.upper.water))}，交收 <span class="mono" style="font-weight:700;color:${(-calc.upper.amount)>=0?'var(--accent)':'var(--red)'};">${fmt(Math.round(-calc.upper.amount))}</span></div>`;
-  calc.shares.forEach(s=>{
-    html+=`<div style="padding:4px 0;font-size:13px;"><span style="color:var(--accent);">▼ ${s.name}</span> (${s.pct}%, 水${s.waterNum})：水錢 ${fmt(Math.round(s.water))}，分成 <span class="mono" style="font-weight:700;color:${(-s.amount)>=0?'var(--accent)':'var(--red)'};">${fmt(Math.round(-s.amount))}</span></div>`;
-  });
-  const myPct=100-(calc.upper?calc.upper.pct:0)-calc.shares.reduce((s,x)=>s+x.pct,0);
-  html+=`<hr class="divider"><div style="font-size:14px;font-weight:700;">👤 我 (${myPct}%)：<span class="mono" style="color:${calc.myNet>=0?'var(--accent)':'var(--red)'}">${fmt(Math.round(calc.myNet))}</span></div>`;
-  if(calc.waterProfit>0) html+=`<div style="font-size:12px;color:var(--yellow);margin-top:4px;">其中差額水收入：${fmt(Math.round(calc.waterProfit))}</div>`;
-  // Verification
-  const upperAmt=calc.upper?Math.round(-calc.upper.amount):Math.round(-result); // if banker, total is -result
-  const sharesAmt=Math.round(calc.shares.reduce((s,x)=>s+(-x.amount),0));
-  const myAmt=Math.round(calc.myNet);
-  const balanced=Math.abs(upperAmt-(sharesAmt+myAmt))<2;
-  html+=`<div class="verify-row ${balanced?'verify-ok':'verify-err'}" style="font-size:12px;">${balanced?'✅':'⚠️'} 驗證：上家 ${fmt(upperAmt)} ＝ 股東 ${fmt(sharesAmt)} ＋ 我 ${fmt(myAmt)}</div>`;
+  const calc=calcRecord(acc,rec);
+  let html=`<div class="card-title">即時預覽</div>`;
+  if(cat==='539'){
+    html+=`<div style="font-size:14px;font-weight:700;">交收金額：<span class="mono" style="color:${calc.myNet>=0?'var(--accent)':'var(--red)'}">${fmt(calc.myNet)}</span></div>`;
+  }else{
+    html+=`<div class="text-sm mb-8">輸贏: ${fmt(rec.result)} ${cat==='ball'?'｜ 水錢: '+fmt(rec.waterAmount):'｜ 流水: '+fmtAbs(rec.turnover||0)}</div>`;
+    if(calc.upper){
+      const uAmt=Math.round(-calc.upper.amount);
+      html+=`<div style="padding:3px 0;font-size:13px;"><span style="color:var(--accent2);">▲ ${calc.upper.name}</span> (${calc.upper.pct}%)${cat==='bac'?' 水'+calc.upper.waterNum:''}：<span class="mono" style="font-weight:700;color:${uAmt>=0?'var(--accent)':'var(--red)'}">${fmt(uAmt)}</span> ${cat==='ball'?'<span class="text-sm">(只算輸贏)</span>':''}</div>`;
+    }
+    calc.shares.forEach(s=>{
+      const sAmt=Math.round(-s.amount);
+      html+=`<div style="padding:3px 0;font-size:13px;"><span style="color:var(--accent);">▼ ${s.name}</span> (${s.pct}%)${cat==='bac'?' 水'+s.waterNum:''}：<span class="mono" style="font-weight:700;color:${sAmt>=0?'var(--accent)':'var(--red)'}">${fmt(sAmt)}</span> ${cat==='ball'?'<span class="text-sm">(輸贏+水)</span>':''}</div>`;
+    });
+    const myPct=100-(calc.upper?calc.upper.pct:0)-calc.shares.reduce((s,x)=>s+x.pct,0);
+    html+=`<hr class="divider"><div style="font-size:14px;font-weight:700;">👤 我 (${myPct}%)：<span class="mono" style="color:${calc.myNet>=0?'var(--accent)':'var(--red)'}">${fmt(Math.round(calc.myNet))}</span></div>`;
+    if(cat==='ball'&&rec.waterAmount>0) html+=`<div style="font-size:12px;color:var(--yellow);margin-top:4px;">水錢退在我身上：${fmt(rec.waterAmount)}</div>`;
+    // Verify
+    const uA=calc.upper?Math.round(-calc.upper.amount):0;
+    const sA=Math.round(calc.shares.reduce((s,x)=>s+(-x.amount),0));
+    const mA=Math.round(calc.myNet);
+    const bal=Math.abs(uA-(sA+mA))<2;
+    html+=`<div class="verify-row ${bal?'verify-ok':'verify-err'}" style="font-size:12px;">${bal?'✅':'⚠️'} 上家 ${fmt(uA)} ＝ 股東 ${fmt(sA)} ＋ 我 ${fmt(mA)}</div>`;
+  }
   preview.innerHTML=html;
 }
-function saveRecord() {
+function saveRecord(){
   const accountId=document.getElementById('rec-account').value;
-  const result=parseFloat(document.getElementById('rec-result').value);
-  const turnover=parseFloat(document.getElementById('rec-turnover').value);
+  const acc=DB.accounts.find(a=>a.id===accountId);
+  if(!acc){toast('請選擇帳號');return;}
+  const cat=acc.category||'ball';
   const week=document.getElementById('rec-week').value;
-  if(!accountId){toast('請選擇帳號');return;}
-  if(isNaN(result)){toast('請填寫輸贏金額');return;}
-  if(isNaN(turnover)||turnover<0){toast('請填寫流水金額');return;}
-  const rec={id:_editRecordId||uid(),accountId,result,turnover,week,note:document.getElementById('rec-note').value.trim(),
-    ts:_editRecordId?(DB.records.find(r=>r.id===_editRecordId)||{}).ts||Date.now():Date.now()};
+  let rec={id:_editRecordId||uid(),accountId,week,note:document.getElementById('rec-note').value.trim(),ts:_editRecordId?(DB.records.find(r=>r.id===_editRecordId)||{}).ts||Date.now():Date.now()};
+  if(cat==='ball'){
+    rec.result=parseFloat(document.getElementById('rec-ball-result').value);
+    rec.waterAmount=parseFloat(document.getElementById('rec-ball-water').value)||0;
+    if(isNaN(rec.result)){toast('請填寫輸贏金額');return;}
+  }else if(cat==='bac'){
+    rec.result=parseFloat(document.getElementById('rec-bac-result').value);
+    rec.turnover=parseFloat(document.getElementById('rec-bac-turnover').value)||0;
+    if(isNaN(rec.result)){toast('請填寫輸贏金額');return;}
+  }else{
+    rec.amount=parseFloat(document.getElementById('rec-539-amount').value);
+    if(isNaN(rec.amount)){toast('請填寫交收金額');return;}
+  }
   if(_editRecordId){const i=DB.records.findIndex(r=>r.id===_editRecordId);if(i>=0)DB.records[i]=rec;}else DB.records.push(rec);
   save();closeModal('modal-record');renderRecords();populateWeekSelects();toast('✅ 已儲存');
 }
 function deleteRecord(id){if(!confirm('確定刪除？'))return;DB.records=DB.records.filter(r=>r.id!==id);save();renderRecords();toast('已刪除');}
-function renderRecords() {
+function renderRecords(){
   populateWeekSelects();
   const week=document.getElementById('records-week-filter').value;
-  const recs=DB.records.filter(r=>r.week===week);
+  const catFilter=document.getElementById('records-cat-filter').value;
+  let recs=DB.records.filter(r=>r.week===week);
+  if(catFilter)recs=recs.filter(r=>{const a=DB.accounts.find(a=>a.id===r.accountId);return a&&a.category===catFilter;});
   const el=document.getElementById('records-list');
   if(!recs.length){el.innerHTML='<div class="empty-state">本週無記錄</div>';return;}
-  let tResult=0,tTurnover=0,tMyNet=0;
+  let tMyNet=0;
   const rows=recs.map(r=>{
     const acc=DB.accounts.find(a=>a.id===r.accountId);
     const name=acc?acc.name:'(已刪除)';
-    const calc=acc?calcRecord(acc,r.result,r.turnover):null;
-    tResult+=r.result;tTurnover+=r.turnover;
-    const myNet=calc?Math.round(calc.myNet):0; tMyNet+=myNet;
-    return `<tr><td style="font-weight:600;">${name}</td>
-      <td class="mono" style="color:${r.result>=0?'var(--accent)':'var(--red)'}">${fmt(r.result)}</td>
-      <td class="mono">${fmtAbs(r.turnover)}</td>
+    const cat=acc?acc.category||'ball':'ball';
+    const calc=acc?calcRecord(acc,r):null;
+    const myNet=calc?Math.round(calc.myNet):0;tMyNet+=myNet;
+    const info=cat==='539'?`<span class="mono">${fmt(r.amount||0)}</span>`:cat==='ball'?`<span class="mono">${fmt(r.result||0)}</span> <span class="text-sm">水${fmt(r.waterAmount||0)}</span>`:`<span class="mono">${fmt(r.result||0)}</span> <span class="text-sm">流水${fmtAbs(r.turnover||0)}</span>`;
+    return `<tr><td>${catTag(cat)}</td><td style="font-weight:600;">${name}</td><td>${info}</td>
       <td class="mono" style="font-weight:700;color:${myNet>=0?'var(--accent)':'var(--red)'}">${fmt(myNet)}</td>
       <td style="color:var(--text3);font-size:12px;">${r.note||''}</td>
       <td><div class="btn-row"><button class="btn btn-ghost btn-xs" onclick="openRecordModal('${r.id}')">編輯</button><button class="btn btn-danger btn-xs" onclick="deleteRecord('${r.id}')">刪除</button></div></td></tr>`;
   }).join('');
-  el.innerHTML=`<div class="card"><div class="table-wrap"><table><thead><tr><th>帳號</th><th>輸贏</th><th>流水</th><th>我的淨收</th><th>備註</th><th></th></tr></thead><tbody>${rows}
-    <tr style="border-top:2px solid var(--accent);font-weight:700;"><td>合計</td>
-    <td class="mono" style="color:${tResult>=0?'var(--accent)':'var(--red)'}">${fmt(tResult)}</td>
-    <td class="mono">${fmtAbs(tTurnover)}</td>
+  el.innerHTML=`<div class="card"><div class="table-wrap"><table><thead><tr><th>分類</th><th>帳號</th><th>輸贏/金額</th><th>我的淨收</th><th>備註</th><th></th></tr></thead><tbody>${rows}
+    <tr style="border-top:2px solid var(--accent);font-weight:700;"><td colspan="3">合計</td>
     <td class="mono" style="color:${tMyNet>=0?'var(--accent)':'var(--red)'}">${fmt(tMyNet)}</td>
     <td colspan="2"></td></tr></tbody></table></div></div>`;
 }
 
-// ═══════════════════════════ SETTLEMENT ═══════════════════════════
-function renderSettlement() {
+// ═══════════════ SETTLEMENT ═══════════════
+function renderSettlement(){
   populateWeekSelects();
   const week=document.getElementById('settle-week-filter').value;
-  const recs=DB.records.filter(r=>r.week===week);
+  const catFilter=document.getElementById('settle-cat-filter').value;
+  let recs=DB.records.filter(r=>r.week===week);
+  if(catFilter)recs=recs.filter(r=>{const a=DB.accounts.find(a=>a.id===r.accountId);return a&&a.category===catFilter;});
   const el=document.getElementById('settlement-content');
   if(!recs.length){el.innerHTML='<div class="empty-state">本週無記錄</div>';return;}
-  const pMap={};let tMyNet=0;
+  const pMap={};let tMyNet=0;let t539=0;
   recs.forEach(r=>{
     const acc=DB.accounts.find(a=>a.id===r.accountId);if(!acc)return;
-    const calc=calcRecord(acc,r.result,r.turnover); tMyNet+=calc.myNet;
+    const cat=acc.category||'ball';
+    if(cat==='539'){t539+=(r.amount||0);tMyNet+=(r.amount||0);return;}
+    const calc=calcRecord(acc,r);tMyNet+=calc.myNet;
     if(calc.upper){
       const n=calc.upper.name||'上家';if(!pMap[n])pMap[n]={recv:0,pay:0,details:[]};
       const amt=-calc.upper.amount;
       if(amt>=0)pMap[n].recv+=amt;else pMap[n].pay+=Math.abs(amt);
-      pMap[n].details.push({acc:acc.name,result:r.result,turnover:r.turnover,water:Math.round(calc.upper.water),amount:Math.round(-calc.upper.amount)});
+      pMap[n].details.push({cat,acc:acc.name,result:r.result,info:cat==='ball'?`水${r.waterAmount||0}`:`流水${fmtAbs(r.turnover||0)}`,water:Math.round(calc.upper.water),amount:Math.round(-calc.upper.amount)});
     }
     calc.shares.forEach(s=>{
       if(!pMap[s.name])pMap[s.name]={recv:0,pay:0,details:[]};
       const amt=-s.amount;
       if(amt<=0)pMap[s.name].recv+=Math.abs(amt);else pMap[s.name].pay+=amt;
-      pMap[s.name].details.push({acc:acc.name,result:r.result,turnover:r.turnover,water:Math.round(s.water),amount:Math.round(-s.amount)});
+      pMap[s.name].details.push({cat,acc:acc.name,result:r.result,info:cat==='ball'?`水${r.waterAmount||0}`:`流水${fmtAbs(r.turnover||0)}`,water:Math.round(s.water),amount:Math.round(-s.amount)});
     });
   });
-  let tRecv=0,tPay=0;
-  Object.values(pMap).forEach(p=>{tRecv+=p.recv;tPay+=p.pay;});
+  let tRecv=0,tPay=0;Object.values(pMap).forEach(p=>{tRecv+=p.recv;tPay+=p.pay;});
   let html=`<div class="summary-grid mb-16">
     <div class="summary-box"><div class="label">我的淨收入</div><div class="value" style="color:${tMyNet>=0?'var(--accent)':'var(--red)'}">${fmt(Math.round(tMyNet))}</div></div>
     <div class="summary-box"><div class="label">應收合計</div><div class="value green">${fmtAbs(Math.round(tRecv))}</div></div>
     <div class="summary-box"><div class="label">應付合計</div><div class="value red">${fmtAbs(Math.round(tPay))}</div></div>
   </div>`;
+  if(t539!==0)html+=`<div class="settle-card" style="border-color:var(--purple);"><div class="settle-header"><span style="font-weight:700;">🔢 539 合計</span><span class="mono" style="font-weight:700;color:${t539>=0?'var(--accent)':'var(--red)'}">${fmt(Math.round(t539))}</span></div></div>`;
   Object.entries(pMap).forEach(([name,data])=>{
     const net=data.recv-data.pay;
     html+=`<div class="settle-card"><div class="settle-header"><span style="font-weight:700;font-size:15px;">${name}</span>
       <span class="mono" style="font-weight:700;color:${net>=0?'var(--accent)':'var(--red)'}">${net>=0?'應收':'應付'} ${fmtAbs(net)}</span></div>
-      <div class="table-wrap"><table style="font-size:12px;"><thead><tr><th>帳號</th><th>輸贏</th><th>流水</th><th>水錢</th><th>交收金額</th></tr></thead>
-      <tbody>${data.details.map(d=>`<tr><td>${d.acc}</td>
-        <td class="mono" style="color:${d.result>=0?'var(--accent)':'var(--red)'}">${fmt(d.result)}</td>
-        <td class="mono">${fmtAbs(d.turnover)}</td><td class="mono">${fmt(d.water)}</td>
-        <td class="mono" style="font-weight:600;color:${d.amount>=0?'var(--accent)':'var(--red)'}">${fmt(d.amount)}</td></tr>`).join('')}</tbody></table></div></div>`;
+      <div class="table-wrap"><table style="font-size:12px;"><thead><tr><th>帳號</th><th>輸贏</th><th>資訊</th><th>交收</th></tr></thead>
+      <tbody>${data.details.map(d=>`<tr><td>${catTag(d.cat)} ${d.acc}</td><td class="mono" style="color:${d.result>=0?'var(--accent)':'var(--red)'}">${fmt(d.result)}</td><td class="text-sm">${d.info}</td><td class="mono" style="font-weight:600;color:${d.amount>=0?'var(--accent)':'var(--red)'}">${fmt(d.amount)}</td></tr>`).join('')}</tbody></table></div></div>`;
   });
   el.innerHTML=html;
 }
 
-// ═══════════════════════════ MONTHLY ═══════════════════════════
-function renderMonthly() {
-  populateWeekSelects();
-  const month=document.getElementById('monthly-filter').value;
-  const recs=DB.records.filter(r=>r.week.startsWith(month));
-  const el=document.getElementById('monthly-content');
+// ═══════════════ MONTHLY ═══════════════
+function renderMonthly(){
+  populateWeekSelects();const month=document.getElementById('monthly-filter').value;
+  const recs=DB.records.filter(r=>r.week.startsWith(month));const el=document.getElementById('monthly-content');
   if(!recs.length){el.innerHTML='<div class="empty-state">本月無記錄</div>';return;}
-  const wMap={};
-  recs.forEach(r=>{if(!wMap[r.week])wMap[r.week]=[];wMap[r.week].push(r);});
+  const wMap={};recs.forEach(r=>{if(!wMap[r.week])wMap[r.week]=[];wMap[r.week].push(r);});
   let mTotal=0;let html='';
-  Object.keys(wMap).sort().forEach(week=>{
-    let wNet=0;
-    wMap[week].forEach(r=>{const acc=DB.accounts.find(a=>a.id===r.accountId);if(acc)wNet+=calcRecord(acc,r.result,r.turnover).myNet;});
-    mTotal+=wNet;
-    html+=`<div class="settle-card"><div class="flex-between"><span style="font-weight:600;">${getWeekDisplay(week)}</span>
-      <span class="mono" style="font-weight:700;color:${wNet>=0?'var(--accent)':'var(--red)'}">${fmt(Math.round(wNet))}</span></div></div>`;
+  Object.keys(wMap).sort().forEach(week=>{let wNet=0;wMap[week].forEach(r=>{const acc=DB.accounts.find(a=>a.id===r.accountId);if(!acc)return;const cat=acc.category||'ball';if(cat==='539')wNet+=(r.amount||0);else wNet+=calcRecord(acc,r).myNet;});mTotal+=wNet;
+    html+=`<div class="settle-card"><div class="flex-between"><span style="font-weight:600;">${getWeekDisplay(week)}</span><span class="mono" style="font-weight:700;color:${wNet>=0?'var(--accent)':'var(--red)'}">${fmt(Math.round(wNet))}</span></div></div>`;
   });
-  el.innerHTML=`<div class="summary-grid mb-16">
-    <div class="summary-box"><div class="label">月份</div><div class="value blue">${month}</div></div>
-    <div class="summary-box"><div class="label">月淨利潤</div><div class="value" style="color:${mTotal>=0?'var(--accent)':'var(--red)'}">${fmt(Math.round(mTotal))}</div></div>
-    <div class="summary-box"><div class="label">週數</div><div class="value">${Object.keys(wMap).length}</div></div>
-  </div>`+html;
+  el.innerHTML=`<div class="summary-grid mb-16"><div class="summary-box"><div class="label">月份</div><div class="value blue">${month}</div></div><div class="summary-box"><div class="label">月淨利潤</div><div class="value" style="color:${mTotal>=0?'var(--accent)':'var(--red)'}">${fmt(Math.round(mTotal))}</div></div><div class="summary-box"><div class="label">週數</div><div class="value">${Object.keys(wMap).length}</div></div></div>`+html;
 }
 
-// ═══════════════════════════ VERIFY ═══════════════════════════
-function renderVerify() {
-  populateWeekSelects();
-  const week=document.getElementById('verify-week-filter').value;
-  const recs=DB.records.filter(r=>r.week===week);
-  const el=document.getElementById('verify-content');
-  if(!recs.length){el.innerHTML='<div class="empty-state">本週無記錄</div>';return;}
+// ═══════════════ VERIFY ═══════════════
+function renderVerify(){
+  populateWeekSelects();const week=document.getElementById('verify-week-filter').value;
+  const catFilter=document.getElementById('verify-cat-filter').value;
+  let recs=DB.records.filter(r=>r.week===week);
+  if(catFilter)recs=recs.filter(r=>{const a=DB.accounts.find(a=>a.id===r.accountId);return a&&a.category===catFilter;});
+  const el=document.getElementById('verify-content');if(!recs.length){el.innerHTML='<div class="empty-state">本週無記錄</div>';return;}
   let html='';
   recs.forEach(r=>{
     const acc=DB.accounts.find(a=>a.id===r.accountId);if(!acc)return;
-    const calc=calcRecord(acc,r.result,r.turnover);
-    const upperAmt=calc.upper?Math.round(-calc.upper.amount):0;
-    const sharesTotal=Math.round(calc.shares.reduce((s,x)=>s+(-x.amount),0));
-    const myPortion=Math.round(calc.myNet);
-    const checkSum=sharesTotal+myPortion;
-    const balanced=Math.abs(upperAmt-checkSum)<2;
+    const cat=acc.category||'ball';
+    if(cat==='539'){html+=`<div class="card mb-12"><div class="flex-between"><span style="font-weight:700;">${catTag(cat)} ${acc.name}</span><span class="mono" style="font-weight:700;color:${(r.amount||0)>=0?'var(--accent)':'var(--red)'}">${fmt(r.amount||0)}</span></div><div class="verify-row verify-ok">✅ 539 直接交收，無需驗證</div></div>`;return;}
+    const calc=calcRecord(acc,r);
+    const uA=calc.upper?Math.round(-calc.upper.amount):0;
+    const sA=Math.round(calc.shares.reduce((s,x)=>s+(-x.amount),0));
+    const mA=Math.round(calc.myNet);const checkSum=sA+mA;const bal=Math.abs(uA-checkSum)<2;
     const myPct=100-(calc.upper?calc.upper.pct:0)-calc.shares.reduce((s,x)=>s+x.pct,0);
-    html+=`<div class="card mb-12"><div class="flex-between mb-12"><span style="font-weight:700;font-size:15px;">${acc.name}</span>
-      <span class="text-sm">輸贏 ${fmt(r.result)} ｜ 流水 ${fmtAbs(r.turnover)}</span></div>
-      <div class="table-wrap"><table style="font-size:12px;"><thead><tr><th>對象</th><th>比例</th><th>水數</th><th>水錢</th><th>交收金額</th></tr></thead><tbody>
-      ${calc.upper?`<tr style="background:var(--blue-dim);"><td>▲ ${calc.upper.name} (上家)</td><td class="mono">${calc.upper.pct}%</td><td class="mono">${calc.upper.waterNum}</td><td class="mono">${fmt(Math.round(calc.upper.water))}</td><td class="mono" style="font-weight:700;color:${upperAmt>=0?'var(--accent)':'var(--red)'}">${fmt(upperAmt)}</td></tr>`:''}
-      ${calc.shares.map(s=>`<tr><td>▼ ${s.name}</td><td class="mono">${s.pct}%</td><td class="mono">${s.waterNum}</td><td class="mono">${fmt(Math.round(s.water))}</td><td class="mono" style="font-weight:700;color:${(-s.amount)>=0?'var(--accent)':'var(--red)'}">${fmt(Math.round(-s.amount))}</td></tr>`).join('')}
-      <tr style="border-top:2px solid var(--accent);"><td style="font-weight:700;">👤 我</td><td class="mono">${myPct}%</td><td colspan="2"></td><td class="mono" style="font-weight:700;color:${myPortion>=0?'var(--accent)':'var(--red)'}">${fmt(myPortion)}</td></tr>
+    const info=cat==='ball'?`輸贏 ${fmt(r.result)} ｜ 水錢 ${fmt(r.waterAmount||0)}`:`輸贏 ${fmt(r.result)} ｜ 流水 ${fmtAbs(r.turnover||0)}`;
+    html+=`<div class="card mb-12"><div class="flex-between mb-12"><span style="font-weight:700;">${catTag(cat)} ${acc.name}</span><span class="text-sm">${info}</span></div>
+      <div class="table-wrap"><table style="font-size:12px;"><thead><tr><th>對象</th><th>比例</th><th>${cat==='bac'?'水數':''}</th><th>交收</th><th>說明</th></tr></thead><tbody>
+      ${calc.upper?`<tr style="background:var(--blue-dim);"><td>▲ ${calc.upper.name}</td><td class="mono">${calc.upper.pct}%</td><td class="mono">${cat==='bac'?calc.upper.waterNum:''}</td><td class="mono" style="font-weight:700;color:${uA>=0?'var(--accent)':'var(--red)'}">${fmt(uA)}</td><td class="text-sm">${cat==='ball'?'只算輸贏':'(輸贏+水)×比例'}</td></tr>`:''}
+      ${calc.shares.map(s=>{const sa=Math.round(-s.amount);return `<tr><td>▼ ${s.name}</td><td class="mono">${s.pct}%</td><td class="mono">${cat==='bac'?s.waterNum:''}</td><td class="mono" style="font-weight:700;color:${sa>=0?'var(--accent)':'var(--red)'}">${fmt(sa)}</td><td class="text-sm">${cat==='ball'?'(輸贏+水)×比例':'(輸贏+水)×比例'}</td></tr>`;}).join('')}
+      <tr style="border-top:2px solid var(--accent);"><td style="font-weight:700;">👤 我</td><td class="mono">${myPct}%</td><td></td><td class="mono" style="font-weight:700;color:${mA>=0?'var(--accent)':'var(--red)'}">${fmt(mA)}</td><td></td></tr>
       </tbody></table></div>
-      <div class="verify-row ${balanced?'verify-ok':'verify-err'}">${balanced?'✅':'⚠️'} 上家 ${fmt(upperAmt)} ${balanced?'＝':'≠'} 股東 ${fmt(sharesTotal)} ＋ 我 ${fmt(myPortion)} ＝ ${fmt(checkSum)}</div></div>`;
+      <div class="verify-row ${bal?'verify-ok':'verify-err'}">${bal?'✅':'⚠️'} 上家 ${fmt(uA)} ${bal?'＝':'≠'} 股東 ${fmt(sA)} ＋ 我 ${fmt(mA)} ＝ ${fmt(checkSum)}</div></div>`;
   });
   el.innerHTML=html;
 }
 
-// ═══════════════════════════ DASHBOARD ═══════════════════════════
-function renderDashboard() {
-  populateWeekSelects();
-  const cw=getCurrentWeek(),cm=getMonthLabel(new Date());
+// ═══════════════ DASHBOARD ═══════════════
+function renderDashboard(){
+  populateWeekSelects();const cw=getCurrentWeek(),cm=getMonthLabel(new Date());
   const wRecs=DB.records.filter(r=>r.week===cw),mRecs=DB.records.filter(r=>r.week.startsWith(cm));
-  let wNet=0,mNet=0,tRecv=0,tPay=0;
-  wRecs.forEach(r=>{const acc=DB.accounts.find(a=>a.id===r.accountId);if(acc){const c=calcRecord(acc,r.result,r.turnover);wNet+=c.myNet;if(c.upperNet>=0)tRecv+=c.upperNet;else tPay+=Math.abs(c.upperNet);tPay+=c.sharesNet;}});
-  mRecs.forEach(r=>{const acc=DB.accounts.find(a=>a.id===r.accountId);if(acc)mNet+=calcRecord(acc,r.result,r.turnover).myNet;});
-  const setVal=(id,v,col)=>{const e=document.getElementById(id);e.textContent='$'+fmt(Math.round(v));if(col)e.style.color=v>=0?'var(--accent)':'var(--red)';};
-  setVal('dash-weekly',wNet,true);setVal('dash-monthly',mNet,true);
-  document.getElementById('dash-recv').textContent='$'+fmtAbs(tRecv);
-  document.getElementById('dash-pay').textContent='$'+fmtAbs(tPay);
+  let wNet=0,mNet=0;
+  const calcNet=(r)=>{const acc=DB.accounts.find(a=>a.id===r.accountId);if(!acc)return 0;const cat=acc.category||'ball';if(cat==='539')return r.amount||0;return calcRecord(acc,r).myNet;};
+  wRecs.forEach(r=>wNet+=calcNet(r));mRecs.forEach(r=>mNet+=calcNet(r));
+  const setV=(id,v)=>{const e=document.getElementById(id);e.textContent='$'+fmt(Math.round(v));e.style.color=v>=0?'var(--accent)':'var(--red)';};
+  setV('dash-weekly',wNet);setV('dash-monthly',mNet);
+  document.getElementById('dash-recv').textContent='$0';document.getElementById('dash-pay').textContent='$0';
   const recent=[...DB.records].sort((a,b)=>b.ts-a.ts).slice(0,6);
-  document.getElementById('dash-recent').innerHTML=recent.length?recent.map(r=>{const acc=DB.accounts.find(a=>a.id===r.accountId);return `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px;"><span>${acc?acc.name:'?'}</span><span class="mono" style="color:${r.result>=0?'var(--accent)':'var(--red)'}">${fmt(r.result)}</span></div>`;}).join(''):'<div class="empty-state">尚無記錄</div>';
-  document.getElementById('dash-accounts').innerHTML=DB.accounts.length?DB.accounts.map(acc=>{let net=0;wRecs.filter(r=>r.accountId===acc.id).forEach(r=>{net+=calcRecord(acc,r.result,r.turnover).myNet;});return `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px;"><span>${acc.name}</span><span class="mono" style="color:${net>=0?'var(--accent)':'var(--red)'}">${fmt(Math.round(net))}</span></div>`;}).join(''):'<div class="empty-state">尚無帳號</div>';
+  document.getElementById('dash-recent').innerHTML=recent.length?recent.map(r=>{const acc=DB.accounts.find(a=>a.id===r.accountId);const cat=acc?acc.category||'ball':'ball';const myNet=Math.round(calcNet(r));return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px;">${catTag(cat)} <span style="flex:1;margin-left:8px;">${acc?acc.name:'?'}</span><span class="mono" style="color:${myNet>=0?'var(--accent)':'var(--red)'}">${fmt(myNet)}</span></div>`;}).join(''):'<div class="empty-state">尚無記錄</div>';
+  document.getElementById('dash-accounts').innerHTML=DB.accounts.length?DB.accounts.map(acc=>{let net=0;wRecs.filter(r=>r.accountId===acc.id).forEach(r=>net+=calcNet(r));return `<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px;">${catTag(acc.category||'ball')} <span style="flex:1;margin-left:8px;">${acc.name}</span><span class="mono" style="color:${net>=0?'var(--accent)':'var(--red)'}">${fmt(Math.round(net))}</span></div>`;}).join(''):'<div class="empty-state">尚無帳號</div>';
 }
 
-// ═══════════════════════════ PW MANAGER ═══════════════════════════
+// ═══════════════ PW MANAGER ═══════════════
 function showPwManager(){openModal('modal-pwmanager');renderPwList();}
 async function renderPwList(){const el=document.getElementById('pwm-list');el.innerHTML='<div class="text-sm" style="text-align:center;padding:12px;">載入中...</div>';try{const entries=await apiGet('/api/passwords');if(!entries.length){el.innerHTML='<div class="empty-state">尚無記錄</div>';return;}el.innerHTML=entries.map(e=>`<div style="background:var(--surface2);border-radius:8px;padding:10px 12px;margin-bottom:6px;"><div style="display:flex;justify-content:space-between;align-items:start;"><div><div style="font-weight:700;font-size:14px;">${e.site}</div><div style="font-size:12px;color:var(--text2);">帳號：${e.account}</div><div style="font-size:12px;color:var(--text2);display:flex;align-items:center;gap:6px;">密碼：<span id="pwm-pw-${e.id}">••••••</span><button class="btn btn-ghost btn-xs" onclick="togglePw('${e.id}','${e.password}')">顯示</button></div>${e.note?`<div style="font-size:11px;color:var(--text3);margin-top:2px;">${e.note}</div>`:''}</div><button class="btn btn-danger btn-xs" onclick="deletePwEntry(${e.id})">刪除</button></div></div>`).join('');}catch{el.innerHTML='<div style="color:var(--red);padding:12px;">載入失敗</div>';}}
 function togglePw(id,pw){const el=document.getElementById('pwm-pw-'+id);el.textContent=el.textContent==='••••••'?pw:'••••••';}
@@ -748,7 +760,7 @@ async function savePwEntry(){const s=document.getElementById('pwm-site').value.t
 async function deletePwEntry(id){await apiDelete('/api/passwords/'+id);renderPwList();toast('已刪除');}
 async function changeSystemPw(){const o=document.getElementById('pwm-change-old').value,n=document.getElementById('pwm-change-new').value.trim(),m=document.getElementById('pwm-change-msg'),r=await apiPost('/api/change-password',{oldPassword:o,newPassword:n});if(r.ok){m.style.color='var(--accent)';m.textContent='✅ 密碼已更新';}else{m.style.color='var(--red)';m.textContent=r.error;}setTimeout(()=>m.textContent='',2500);}
 
-// ═══════════════════════════ API ═══════════════════════════
+// ═══════════════ API ═══════════════
 function getToken(){return localStorage.getItem('ball_token')||'';}
 function authHeaders(){return {'Content-Type':'application/json','Authorization':'Bearer '+getToken()};}
 let _saveTimer=null;
@@ -765,7 +777,7 @@ async function exportData(){window.location.href='/api/export';}
 async function importData(file){const reader=new FileReader();reader.onload=async e=>{try{const all=JSON.parse(e.target.result);const r=await apiPost('/api/import',all);if(r.ok){await loadFromServer();renderAll();toast('✅ 匯入成功');}}catch{toast('❌ 匯入失敗');}};reader.readAsText(file);}
 function doLogout(){localStorage.removeItem('ball_token');window.location.reload();}
 
-// ═══════════════════════════ INIT ═══════════════════════════
+// ═══════════════ INIT ═══════════════
 document.getElementById('today-date').textContent=new Date().toLocaleDateString('zh-TW',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
 (async()=>{try{const me=await fetch('/api/me',{headers:authHeaders()});if(me.ok){await loadFromServer();document.getElementById('pw-overlay').style.display='none';renderAll();}else{try{const rt=await fetch('/api/check-init');const rd=await rt.json();if(!rd.initialized){document.getElementById('register-section').style.display='block';document.getElementById('login-subtitle').textContent='首次使用，請建立管理員帳號';}}catch(e){}showLogin();}}catch(e){showLogin();}})();
 </script>
